@@ -2,6 +2,11 @@
 	"nameShort": "NPSharp",
 	"nameLong": "Notepad Sharp",
 	"applicationName": "NPSharp",
+	    "extensionsGallery": {
+        "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+        "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
+        "itemUrl": "https://marketplace.visualstudio.com/items"
+    },
 	"dataFolderName": ".thainaide",
 	"win32MutexName": "npsharp",
 	"licenseName": "MIT",
