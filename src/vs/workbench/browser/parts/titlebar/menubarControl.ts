@@ -49,7 +49,7 @@ registerAction2(class ToggleActivityBarAction extends Action2 {
 	constructor() {
 		super({
 			id: 'editor.action.toggleActivityBar',
-			title: localize('toggleActivityBar', 'Mostrar Barra de Atividades'),
+			title: localize('toggleActivityBar', 'Show Icons'),
 			f1: false
 		});
 	}
@@ -66,11 +66,6 @@ registerAction2(class ToggleActivityBarAction extends Action2 {
 		el.style.display = isHidden ? 'flex' : 'none';
 
 		// Toggle dos ícones de conta e config
-		const accountIcon = document.querySelector<HTMLElement>('.activitybar .account');
-		if (accountIcon) accountIcon.style.display = isHidden ? 'flex' : 'none';
-
-		const settingsIcon = document.querySelector<HTMLElement>('.activitybar .settings');
-		if (settingsIcon) settingsIcon.style.display = isHidden ? 'flex' : 'none';
 	}
 });
 
@@ -130,7 +125,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 MenuRegistry.appendMenuItem(MenubarExtrasMenu, {
 	command: {
 		id: 'workbench.action.toggleSidebarVisibility',
-		title: localize('toggleSidebar', 'ativar espaço de trabalho')
+		title: localize('toggleSidebar', 'Show File Tree')
 	},
 	order: 1
 });
@@ -138,7 +133,7 @@ MenuRegistry.appendMenuItem(MenubarExtrasMenu, {
 MenuRegistry.appendMenuItem(MenubarExtrasMenu, {
 	command: {
 		id: 'workbench.action.toggleAuxiliaryBar',
-		title: localize('toggleAuxBar', 'Mostrar Chat')
+		title: localize('toggleAuxBar', 'Show More')
 	},
 	order: 2
 });
@@ -153,7 +148,7 @@ MenuRegistry.appendMenuItem(MenubarExtrasMenu, {
 MenuRegistry.appendMenuItem(MenubarExtrasMenu, {
 	command: {
 		id: 'editor.action.toggleActivityBar',
-		title: localize('toggleActivityBar', 'Mostrar Barra de Atividades')
+		title: localize('toggleActivityBar', 'Show icons')
 	},
 	order: 4
 });

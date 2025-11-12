@@ -899,7 +899,7 @@ export class GettingStartedPage extends EditorPane {
 
 		const header = $('.header', {},
 			$('h1.product-name.caption', {}, this.productService.nameLong),
-			$('p.subtitle.description', {}, localize({ key: 'gettingStarted.editingEvolved', comment: ['Shown as subtitle on the Welcome page.'] }, "Essa versão do programa foi feita especialmente para uma pessoa única, que acha que não é especial (sim, eu falo de você, Thainá).\nSe procurar bem,\nMostrando que até o impossível, quando feito com amor, se torna possível.\nVocê é única e amada."))
+			$('p.subtitle.description', {}, localize({ key: 'gettingStarted.editingEvolved', comment: ['Shown as subtitle on the Welcome page.'] }, "Feito pra você, Thainá. Única, amada, desejada. O impossível é possível com amor."))
 		);
 
 		const leftColumn = $('.categories-column.categories-column-left', {},);
