@@ -111,6 +111,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 export const MenubarExtrasMenu = new MenuId('MenubarExtrasMenu');
 
 //Mais uma vez me metendo em codigos só porque amo a thainá
+export const MenubarExtrasMenu = new MenuId('MenubarExtrasMenu');
 MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 	submenu: MenubarExtrasMenu,
 	title: {
@@ -118,7 +119,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 		original: 'Extras',
 		mnemonicTitle: localize({ key: 'mExtrasMnemonic', comment: ['&& denotes a mnemonic'] }, '&&Extras')
 	},
-	order: 9.5 // define a posição — entre Go (9) e Terminal (10), por exemplo
+	order: 10 // define a posição — entre Go (9) e Terminal (10), por exemplo
 });
 
 // 3. Adiciona ações dentro dele

@@ -537,6 +537,8 @@
 				});
 
 
+
+
 				// Code windows have a `vscodeWindowId` property to identify them
 				Object.defineProperty(window, 'vscodeWindowId', {
 					get: () => windowConfig.windowId
