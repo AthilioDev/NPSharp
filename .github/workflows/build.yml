@@ -40,7 +40,7 @@ jobs:
         ISCC.exe build/installer.iss
 
     - name: Upload Installer
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: NPSharp-Installer
         path: build/output/*.exe
