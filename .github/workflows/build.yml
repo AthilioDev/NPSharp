@@ -1,46 +1,47 @@
-name: Build NPSharp Installer
+name: Build NPSharp
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup Node.js 22
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 22.x
-        cache: "npm"
+        node-version: 22
 
     - name: Install dependencies
-      run: |
-        setx NODE_OPTIONS "--max-old-space-size=6144"
-        npm ci
-
-    - name: Download InnoSetup Portable
-      run: |
-        curl -L -o inno.7z "https://www.jrsoftware.org/download.php/is7portable"
-        7z x inno.7z -oinno
-        setx PATH "%PATH%;%CD%\inno"
+      run: npm ci
 
     - name: Compile NPSharp
-      run: npm run compile
+      run: npm run compile-build
+
+    - name: Build Extensions
+      run: npm run compile-extensions-build
+
+    - name: Create Portable
+      run: npm run minify-vscode
 
     - name: Create Installer
-      run: |
-        ISCC.exe build/installer.iss
+      run: npm run 7z # ou ajuste se tiver script real do installer
 
-    - name: Upload Installer
+    - name: Upload Portable Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NPSharp-Portable
+        path: build/output/portable/**/*
+
+    - name: Upload Installer Artifact
       uses: actions/upload-artifact@v4
       with:
         name: NPSharp-Installer
-        path: build/output/*.exe
+        path: build/output/installer/**/*.exe
