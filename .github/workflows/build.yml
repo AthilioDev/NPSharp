@@ -1,0 +1,46 @@
+name: Build NPSharp Installer
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js 22
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22.x
+        cache: "npm"
+
+    - name: Install dependencies
+      run: |
+        setx NODE_OPTIONS "--max-old-space-size=6144"
+        npm ci
+
+    - name: Download InnoSetup Portable
+      run: |
+        curl -L -o inno.7z "https://www.jrsoftware.org/download.php/is7portable"
+        7z x inno.7z -oinno
+        setx PATH "%PATH%;%CD%\inno"
+
+    - name: Compile NPSharp
+      run: npm run compile
+
+    - name: Create Installer
+      run: |
+        ISCC.exe build/installer.iss
+
+    - name: Upload Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: NPSharp-Installer
+        path: build/output/*.exe
