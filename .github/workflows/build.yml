@@ -37,11 +37,23 @@ jobs:
       run: node --max-old-space-size=10240 ./node_modules/gulp/bin/gulp.js compile-build-with-mangling
 
     - name: Build Extensions with Retry
+      shell: pwsh
       run: |
-        RETRIES=5
-        for i in $(seq 1 $RETRIES); do
-          node --max-old-space-size=10240 ./node_modules/gulp/bin/gulp.js compile-extensions-build && break || echo "Retry $i failed, retrying in 5s..." && sleep 5
-        done
+        $RETRIES = 5
+        for ($i = 1; $i -le $RETRIES; $i++) {
+            Write-Host "Attempt $i..."
+            try {
+                node --max-old-space-size=10240 ./node_modules/gulp/bin/gulp.js compile-extensions-build
+                Write-Host "Success on attempt $i"
+                break
+            } catch {
+                Write-Host "Attempt $i failed, retrying in 5 seconds..."
+                Start-Sleep -Seconds 5
+                if ($i -eq $RETRIES) {
+                    throw "All $RETRIES attempts failed."
+                }
+            }
+        }
 
     - name: Create Portable
       run: node --max-old-space-size=10240 ./node_modules/gulp/bin/gulp.js minify-vscode
