@@ -20,12 +20,18 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      # Dependência nativa só pro Linux
+      # Dependências nativas necessárias pra compilar módulos
       - name: Install Linux deps
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libkrb5-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libkrb5-dev \
+            libx11-dev \
+            libxkbfile-dev \
+            libsecret-1-dev
 
       - name: Install deps
         run: npm ci
@@ -47,12 +53,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      # Dependência do Kerberos só no Linux
       - name: Install Linux deps
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libkrb5-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libkrb5-dev \
+            libx11-dev \
+            libxkbfile-dev \
+            libsecret-1-dev
 
       - name: Install deps
         run: npm ci
@@ -60,7 +71,7 @@ jobs:
       - name: Build app
         run: npm run build
 
-      # ===== PACKAGING POR OS =====
+      # ===== PACKAGING =====
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: npm run dist:linux
@@ -72,7 +83,7 @@ jobs:
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: npm run dist:win
-        shell: pwsh   # Importante: Windows usa PowerShell
+        shell: pwsh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -110,8 +121,6 @@ jobs:
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: NPSharp v${{ steps.ver.outputs.version }}
-          draft: false
-          prerelease: false
           files: all_builds/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
