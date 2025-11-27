@@ -1,0 +1,107 @@
+name: NPSharp Constructor
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+
+  build:
+    name: Build binaries ${{ matrix.os }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Package app
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            npm run dist:linux
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            npm run dist:win
+          else
+            npm run dist:mac
+          fi
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: dist/*
+
+
+  release:
+    name: Create Tag & Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: ver
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
+      # Essa ação NÃO tem v4. Última versão é essa.
+      - name: Create tag
+        uses: actions/github-tag-action@v1.67.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: v${{ steps.ver.outputs.version }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all_builds
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: NPSharp v${{ steps.ver.outputs.version }}
+          draft: false
+          prerelease: false
+          files: all_builds/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
