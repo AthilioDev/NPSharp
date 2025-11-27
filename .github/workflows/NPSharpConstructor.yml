@@ -35,18 +35,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            pack: dist:linux
-            shell: bash
-
-          - os: macos-latest
-            pack: dist:mac
-            shell: bash
-
-          - os: windows-latest
-            pack: dist:win
-            shell: bash
 
     steps:
       - uses: actions/checkout@v4
@@ -62,9 +50,21 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Package app
-        run: npm run ${{ matrix.pack }}
-        shell: ${{ matrix.shell }}
+      # ===== PACKAGING POR OS =====
+      - name: Package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: npm run dist:linux
+
+      - name: Package (macOS)
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: npm run dist:mac
+
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: npm run dist:win
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
