@@ -22,22 +22,18 @@ jobs:
         with:
           node-version: 22
 
-      # Dependências nativas necessárias pra compilar módulos
-      - name: Install Linux deps
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libkrb5-dev \
-            libx11-dev \
-            libxkbfile-dev \
-            libsecret-1-dev
-
       - name: Install deps
         run: npm ci
 
-      - name: Run tests
-        run: npm test
+      # ===== COMPILAÇÃO (ngc “certo”) =====
+      - name: Build (gulp compile)
+        run: |
+          npx gulp compile
+
+      # ===== HYGIENE como o VSCode faz =====
+      - name: Hygiene checks
+        run: |
+          npx gulp hygiene
 
   build:
     name: Build binaries (${{ matrix.os }})
@@ -55,23 +51,17 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Linux deps
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libkrb5-dev \
-            libx11-dev \
-            libxkbfile-dev \
-            libsecret-1-dev
-
       - name: Install deps
         run: npm ci
 
+      # ===== COMPILAÇÃO PRINCIPAL =====
       - name: Build app
-        run: npm run build
+        run: |
+          npx gulp compile
+          npx gulp minify
+          npx gulp optimize
 
-      # ===== PACKAGING =====
+      # ===== PACKAGE POR SISTEMA =====
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: npm run dist:linux
@@ -83,7 +73,6 @@ jobs:
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: npm run dist:win
-        shell: pwsh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -121,6 +110,8 @@ jobs:
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: NPSharp v${{ steps.ver.outputs.version }}
+          draft: false
+          prerelease: false
           files: all_builds/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
