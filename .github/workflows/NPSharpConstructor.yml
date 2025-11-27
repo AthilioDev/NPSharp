@@ -20,7 +20,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
+
+      # Dependência nativa só pro Linux
+      - name: Install Linux deps
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y libkrb5-dev
 
       - name: Install deps
         run: npm ci
@@ -42,7 +47,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
+
+      # Dependência do Kerberos só no Linux
+      - name: Install Linux deps
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y libkrb5-dev
 
       - name: Install deps
         run: npm ci
@@ -53,18 +63,16 @@ jobs:
       # ===== PACKAGING POR OS =====
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
-        shell: bash
         run: npm run dist:linux
 
       - name: Package (macOS)
         if: matrix.os == 'macos-latest'
-        shell: bash
         run: npm run dist:mac
 
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
-        shell: bash
         run: npm run dist:win
+        shell: pwsh   # Importante: Windows usa PowerShell
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
