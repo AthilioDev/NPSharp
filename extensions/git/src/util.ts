@@ -8,7 +8,6 @@ import { dirname, normalize, sep, relative } from 'path';
 import { Readable } from 'stream';
 import { promises as fs, createReadStream } from 'fs';
 import byline from 'byline';
-import { Stash } from './git';
 
 export const isMacintosh = process.platform === 'darwin';
 export const isWindows = process.platform === 'win32';
@@ -304,7 +303,7 @@ export function subject(value: string): string {
 
 function normalizePath(path: string): string {
 	// Windows & Mac are currently being handled
-	// as case insensitive file systems in VS Code.
+	// as case insensitive file systems in Notepad#.
 	if (isWindows || isMacintosh) {
 		path = path.toLowerCase();
 	}
@@ -846,20 +845,4 @@ export function extractFilePathFromArgs(argv: string[], startIndex: number): str
 	// If no closing quote was found, remove
 	// leading quote and return the path as-is
 	return path.slice(1);
-}
-
-export function getStashDescription(stash: Stash): string | undefined {
-	if (!stash.commitDate && !stash.branchName) {
-		return undefined;
-	}
-
-	const descriptionSegments: string[] = [];
-	if (stash.commitDate) {
-		descriptionSegments.push(fromNow(stash.commitDate));
-	}
-	if (stash.branchName) {
-		descriptionSegments.push(stash.branchName);
-	}
-
-	return descriptionSegments.join(' \u2022 ');
 }
