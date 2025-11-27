@@ -24,16 +24,22 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install deps
+      - name: Install Linux deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libkrb5-dev build-essential python3
+
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Test Node
+      - name: Run Node tests
         run: npm run test-node
 
-      - name: Test Browser
+      - name: Run Browser tests
         run: npm run test-browser-no-install
 
-      - name: Hygiene
+      - name: Hygiene checks
         run: npm run hygiene
 
   # ===========================
@@ -55,10 +61,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install deps
+      - name: Install Linux deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libkrb5-dev build-essential python3
+
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Compile
+      - name: Compile NPSharp
         run: npm run compile
 
       - name: Minify VSCode
@@ -67,7 +79,6 @@ jobs:
       - name: Compile build bundle
         run: npm run compile-build
 
-      # No VSCode, "empacotar" é gerar diretórios e assets em ./out e ./build
       - name: Package artifacts
         run: |
           mkdir -p dist
