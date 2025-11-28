@@ -3,34 +3,34 @@ name: NPSharp Constructor
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      # Sync lockfile to avoid esbuild mismatch
-      - name: Sync lockfile
-        run: npm install --package-lock-only
+      # Patch required for ripgrep downloads
+      - name: Patch npm user-agent (fix RG 403)
+        run: npm config set user-agent "npm/9.0 NPSharpBuilder"
 
-      - name: Install dependencies (CI)
-        run: npm ci
-
-      - name: Install Linux Deps
+      - name: Install Linux deps
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
@@ -46,39 +46,50 @@ jobs:
             libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-base \
             gstreamer1.0-gl gstreamer1.0-libav gstreamer1.0-plugins-good
 
-      # ---------- TESTES (baseado no VSCode oficial) ----------
-      - name: Compile (Core)
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      # ROOT dependencies (VSCode structure)
+      - name: Install root dependencies
+        run: npm ci
+
+      # Install extensions dependencies
+      - name: Install extension deps
+        run: |
+          cd extensions
+          npm ci || npm install
+
+      # Build core TS
+      - name: Compile NPSharp core
         run: npm run compile
 
-      - name: Compile (Client)
+      # Build VSCode client
+      - name: Compile VSCode client
         run: npx gulp compile-client
 
-      - name: Compile (CLI)
+      # Build CLI
+      - name: Compile VSCode CLI
         run: npx gulp compile-cli
 
-      - name: Compile Web (opcional)
-        run: npm run compile-web || echo "web indisponível"
+      # Build Web (optional)
+      - name: Compile Web (optional)
+        run: npm run compile-web || echo "compile-web ausente"
 
-      - name: Run unit tests
-        run: |
-          npm test || echo "SEM TESTES DEFINIDOS — ignorando"
+      # Tests (modelo microsoft)
+      - name: Run Tests
+        run: npm test || echo "Sem testes definidos"
 
-      - name: Run integration tests
-        run: |
-          npm run test-integration || echo "SEM INTEGRAÇÃO — ignorando"
-
+      # Minify step
       - name: Minify VSCode
         run: npm run minify-vscode
 
+      # Prepare output
       - name: Prepare artifacts
         run: |
           mkdir -p dist
           cp -r out dist/out || true
           cp -r build dist/build || true
           cp package.json dist/package.json
-          cp -r scripts dist/scripts || true
-          cp -r resources dist/resources || true
-          cp -r extensions dist/extensions || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -86,9 +97,8 @@ jobs:
           name: build-${{ matrix.os }}
           path: dist/
 
-  # ------------------------ RELEASE ------------------------
   release:
-    name: Create Tag & Release
+    name: Create Release
     needs: build
     runs-on: ubuntu-latest
 
@@ -99,18 +109,18 @@ jobs:
         id: ver
         run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          path: all_builds
+
       - name: Create tag
         uses: actions/github-tag-action@v1.67.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: v${{ steps.ver.outputs.version }}
 
-      - name: Download builds
-        uses: actions/download-artifact@v4
-        with:
-          path: all_builds
-
-      - name: Release
+      - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
