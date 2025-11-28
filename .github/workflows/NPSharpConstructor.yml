@@ -6,9 +6,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ===========================
-  # BUILD BINÁRIOS
-  # ===========================
   build:
     name: Build binaries (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -81,6 +78,10 @@ jobs:
       - name: Compile NPSharp
         run: npm run compile
 
+      # ESTA É A ETAPA QUE FALTAVA
+      - name: Compile Web
+        run: npm run compile-web
+
       - name: Minify VSCode
         run: npm run minify-vscode
 
@@ -100,10 +101,6 @@ jobs:
           name: build-${{ matrix.os }}
           path: dist/
 
-
-  # ===========================
-  # RELEASE FINAL
-  # ===========================
   release:
     name: Create Tag & Release
     needs: build
