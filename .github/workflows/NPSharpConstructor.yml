@@ -29,14 +29,14 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies (retry)
+      - name: Install dependencies
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
         run: |
-          for i in {1..5}; do
-            npm ci && break
-            echo "npm ci failed, retry $i..."
-            sleep 5
-            if [ $i -eq 5 ]; then exit 1; fi
-          done
+          if ($env:RUNNER_OS -eq 'Windows') {
+            npm ci
+          } else {
+            npm ci
+          }
 
       - name: Compile NPSharp core & extensions
         run: |
@@ -46,13 +46,14 @@ jobs:
           npm run compile-web || echo "Web compile skipped"
 
       - name: Run code script
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            scripts/code.bat
-          else
+          if ($env:RUNNER_OS -eq 'Windows') {
+            .\scripts\code.bat
+          } else {
             chmod +x scripts/code.sh
             ./scripts/code.sh
-          fi
+          }
 
   build:
     name: Build Portables & Installers
@@ -80,17 +81,17 @@ jobs:
           npm run minify-vscode
 
       - name: Build Portable & Installer
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          mkdir -p dist
+          if ($env:RUNNER_OS -eq 'Windows') {
             npm run electron
             npx rcedit out/NPSharp.exe --set-version-string "FileVersion" "$(node -p "require('./package.json').version")"
-            mkdir -p dist
-            cp out/NPSharp.exe dist/
-          else
+            Copy-Item out/NPSharp.exe dist/
+          } else {
             npm run electron
-            mkdir -p dist
-            dpkg-deb --build out dist/npsharp_${{ github.run_number }}.deb
-          fi
+            dpkg-deb --build out dist/npsharp_${env:GITHUB_RUN_NUMBER}.deb
+          }
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -103,6 +104,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: ${{ always() }}
+
     steps:
       - uses: actions/checkout@v4
 
