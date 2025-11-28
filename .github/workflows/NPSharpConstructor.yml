@@ -21,6 +21,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      # Fix ripgrep 403 (GitHub API now requires User-Agent header)
+      - name: Patch npm user-agent
+        run: |
+          echo "npm config set user-agent 'npm/9.0 NPSharpBuilder'" >> ~/.npmrc
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
@@ -38,29 +44,24 @@ jobs:
             libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-base \
             gstreamer1.0-gl gstreamer1.0-libav gstreamer1.0-plugins-good
 
-      - name: Ensure lock file ok
-        run: npm install
+      - name: Clean npm cache
+        run: npm cache clean --force
 
-      - name: Install npm dependencies
+      - name: Install NPM deps (CI)
         run: npm ci
 
-      # 1 - Compila core TS
       - name: Compile NPSharp core
         run: npm run compile
 
-      # 2 - Compila VSCode client (gera out-client)
       - name: Compile VSCode client
         run: npx gulp compile-client
 
-      # 3 - Compila VSCode CLI
       - name: Compile VSCode CLI
         run: npx gulp compile-cli
 
-      # 4 - Web build (se existir)
       - name: Compile Web (optional)
-        run: npm run compile-web || echo "compile-web não existe, ignorando..."
+        run: npm run compile-web || echo "compile-web ausente"
 
-      # 5 - Minify (agora sim funciona)
       - name: Minify VSCode
         run: npm run minify-vscode
 
