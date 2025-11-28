@@ -26,18 +26,10 @@ jobs:
           npm install --legacy-peer-deps
       - name: Build Linux (Portable + Installer)
         run: npm run compile-build
-
-      - name: Debug – listar arquivos gerados
-        run: |
-          echo "=== WORKSPACE ==="
-          pwd
-          echo "=== ARQUIVOS ==="
-          ls -R .
-
       - uses: actions/upload-artifact@v5
         with:
           name: linux-artifacts
-          path: ./out  # vamos ajustar após descobrir
+          path: ./out
 
   build-windows:
     name: Build Windows
@@ -55,18 +47,10 @@ jobs:
         run: npm install --legacy-peer-deps
       - name: Build Windows (Portable + Installer)
         run: npm run compile-build
-
-      - name: Debug – listar arquivos gerados
-        run: |
-          echo "=== WORKSPACE ==="
-          powershell -command "pwd"
-          echo "=== ARQUIVOS ==="
-          powershell -command "Get-ChildItem -Recurse"
-
       - uses: actions/upload-artifact@v5
         with:
           name: windows-artifacts
-          path: ./out  # vamos ajustar quando acharmos a pasta
+          path: ./out
 
   release:
     name: Release All Artifacts
@@ -74,15 +58,23 @@ jobs:
     needs: [build-linux, build-windows]
     steps:
       - uses: actions/checkout@v6
+  
       - name: Download Artifacts
         uses: actions/download-artifact@v5
         with:
           path: ./release
+          merge-multiple: true
+  
+      - name: List release folder (debug soviético)
+        run: |
+          echo "=== RELEASE DIR ==="
+          ls -R ./release
+  
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ github.run_number }}"
           name: "NPSHARP v${{ github.run_number }}"
-          artifacts: "./release/**"
+          artifacts: "./release/**/*"
           draft: false
           prerelease: false
