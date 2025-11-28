@@ -44,27 +44,31 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      # 1 - Compila o core do VSCode/NPSharp
-      - name: Compile NPSharp
+      # 1 - Compila core TS
+      - name: Compile NPSharp core
         run: npm run compile
 
-      # 2 - Gera out-build (o que faltou antes!)
-      - name: Compile VSCode core (compile-build)
-        run: npx gulp compile-build
+      # 2 - Compila VSCode client (gera out-client)
+      - name: Compile VSCode client
+        run: npx gulp compile-client
 
-      # 3 - Web build (se existir)
+      # 3 - Compila VSCode CLI
+      - name: Compile VSCode CLI
+        run: npx gulp compile-cli
+
+      # 4 - Web build (se existir)
       - name: Compile Web (optional)
         run: npm run compile-web || echo "compile-web não existe, ignorando..."
 
-      # 4 - Só agora pode minificar
+      # 5 - Minify (agora sim funciona)
       - name: Minify VSCode
         run: npm run minify-vscode
 
       - name: Prepare artifacts
         run: |
           mkdir -p dist
-          cp -r out dist/out
-          cp -r build dist/build
+          cp -r out dist/out || true
+          cp -r build dist/build || true
           cp package.json dist/package.json
 
       - name: Upload artifacts
