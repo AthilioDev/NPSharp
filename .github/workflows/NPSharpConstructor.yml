@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 22
 
-      # Dependências Linux para kerberos, node-pty, chokidar antigo e x11 libs
+      # Dependências Linux para kerberos, node-pty, chokidar antigo, electron e x11 libs
       - name: Install Linux deps
         if: runner.os == 'Linux'
         run: |
@@ -51,7 +51,7 @@ jobs:
             libxdamage1 \
             libxfixes3 \
             libxrandr2 \
-            libasound2 \
+            libasound2t64 \
             libpangocairo-1.0-0 \
             libgtk-3-0 \
             libxkbcommon0 \
@@ -73,7 +73,6 @@ jobs:
             gstreamer1.0-libav \
             gstreamer1.0-plugins-good
 
-      # Atualiza lock
       - name: Ensure lock file matches package.json
         run: npm install
 
@@ -123,9 +122,9 @@ jobs:
             libx11-dev \
             libxkbfile-dev \
             pkg-config \
-            libsecret-1-dev
+            libsecret-1-dev \
+            libasound2t64
 
-      # Atualiza lock
       - name: Ensure lock file matches package.json
         run: npm install
 
