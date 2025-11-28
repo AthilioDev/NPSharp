@@ -1,4 +1,4 @@
-name: NPSharp Constructor Turbo
+name: NPSharp Turbo Build & Release
 
 on:
   push:
@@ -10,15 +10,15 @@ env:
   NODE_OPTIONS: "--max-old-space-size=16384" # 16GB RAM
 
 jobs:
-  build-matrix:
-    name: Build ${{ matrix.os }}
+  tests:
+    name: Run Tests & Code Script on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 120
-    continue-on-error: false # cada job falha sozinho
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    timeout-minutes: 60
+    continue-on-error: false
 
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
-
-      - name: Patch npm user-agent
-        run: npm config set user-agent "npm/9.0 NPSharpBuilder"
+          cache: npm
 
       - name: Install dependencies (retry)
         run: |
@@ -41,51 +38,71 @@ jobs:
             if [ $i -eq 5 ]; then exit 1; fi
           done
 
-      - name: Install extension dependencies (retry)
+      - name: Compile NPSharp core & extensions
         run: |
-          cd extensions
-          for i in {1..5}; do
-            npm ci && break
-            echo "Extension install failed, retry $i..."
-            sleep 5
-            if [ $i -eq 5 ]; then exit 1; fi
-          done
+          npm run compile
+          npx gulp compile-client
+          npx gulp compile-cli
+          npm run compile-web || echo "Web compile skipped"
 
-      - name: Compile NPSharp core
-        run: npm run compile
-
-      - name: Compile VSCode client
-        run: npx gulp compile-client
-
-      - name: Compile CLI
-        run: npx gulp compile-cli
-
-      - name: Compile Web (optional)
-        run: npm run compile-web || echo "compile-web ausente"
-
-      - name: Build portables & installers
+      - name: Run code script
         run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            scripts/code.bat
+          else
+            chmod +x scripts/code.sh
+            ./scripts/code.sh
+          fi
+
+  build:
+    name: Build Portables & Installers
+    needs: tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
+    timeout-minutes: 120
+    continue-on-error: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Compile & Minify
+        run: |
+          npm run compile
           npm run minify-vscode
-          if [ "$RUNNER_OS" == "Windows" ]; then
+
+      - name: Build Portable & Installer
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
             npm run electron
             npx rcedit out/NPSharp.exe --set-version-string "FileVersion" "$(node -p "require('./package.json').version")"
+            mkdir -p dist
+            cp out/NPSharp.exe dist/
           else
             npm run electron
+            mkdir -p dist
             dpkg-deb --build out dist/npsharp_${{ github.run_number }}.deb
           fi
 
-      - name: Upload artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
           path: dist/
 
   release:
-    name: Create Release
-    needs: build-matrix
+    name: Create GitHub Release
+    needs: build
     runs-on: ubuntu-latest
-    if: ${{ always() }}  # garante que release roda mesmo se um job falhar
-
+    if: ${{ always() }}
     steps:
       - uses: actions/checkout@v4
 
@@ -93,12 +110,12 @@ jobs:
         id: ver
         run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
-      - name: Download builds
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: all_builds
 
-      - name: Create tag
+      - name: Create Git tag
         uses: actions/github-tag-action@v1.67.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
