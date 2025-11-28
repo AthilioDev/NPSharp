@@ -6,140 +6,89 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  PROJECT_QUALITY: 'oss'
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
-  compile:
-    name: Compile & Prepare
+  setup-node:
+    name: Setup Node Cache
     runs-on: ubuntu-22.04
+    outputs:
+      cache-hit: ${{ steps.cache-node.outputs.cache-hit }}
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Cache Node Modules
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
-      - name: Install Dependencies
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-22.04
+    needs: setup-node
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential pkg-config libx11-dev libxkbfile-dev libnotify-bin libkrb5-dev
-          npm ci
-
-      - name: Compile NPSHARP
-        run: npm exec -- npm-run-all -lp core-ci extensions-ci hygiene
-
-      - name: Save artifacts for other jobs
-        uses: actions/upload-artifact@v5
-        with:
-          name: npsharp-build
-          path: |
-            .build
-            node_modules
-
-  linux-build:
-    name: Linux Build
-    needs: compile
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v5
-        with:
-          name: npsharp-build
-          path: .
-
-      - name: Build Linux Portables & Installer
+          sudo apt install -y build-essential libx11-dev libxkbfile-dev libnotify-bin pkg-config libkrb5-dev
+          npm install --legacy-peer-deps
+      - name: Build Linux (Portable + Installer)
         run: npm run gulp npsharp-linux
-
-      - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v5
         with:
           name: linux-artifacts
           path: ./out
 
-  windows-build:
-    name: Windows Build
-    needs: compile
+  build-windows:
+    name: Build Windows
     runs-on: windows-2022
+    needs: setup-node
     steps:
-      - uses: actions/download-artifact@v5
-        with:
-          name: npsharp-build
-          path: .
-
-      - name: Build Windows Portables & Installer
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Build Windows (Portable + Installer)
         run: npm run gulp npsharp-win32
-
-      - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v5
         with:
           name: windows-artifacts
           path: ./out
 
-  macos-build:
-    name: macOS Build
-    needs: compile
+  build-macos:
+    name: Build macOS
     runs-on: macos-14
+    needs: setup-node
     steps:
-      - uses: actions/download-artifact@v5
-        with:
-          name: npsharp-build
-          path: .
-
-      - name: Build macOS Portables & Installer
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Build macOS (Portable + Installer)
         run: npm run gulp npsharp-darwin
-
-      - name: Upload macOS Artifacts
-        uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v5
         with:
           name: macos-artifacts
           path: ./out
 
-  create-release:
-    name: Create Tag & Release
-    needs: [linux-build, windows-build, macos-build]
+  release:
+    name: Release All Artifacts
     runs-on: ubuntu-22.04
+    needs: [build-linux, build-windows, build-macos]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set Tag
-        id: tag
-        run: |
-          TAG="v$(date +'%Y.%m.%d.%H%M')"
-          echo "TAG=$TAG" >> $GITHUB_ENV
-          git tag $TAG
-          git push origin $TAG
-
-      - name: Create Release
-        id: create_release
+      - uses: actions/checkout@v6
+      - name: Download Artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./release
+      - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.TAG }}
-          name: "NPSHARP ${{ env.TAG }}"
-          body: "Automated build release"
+          tag: "v${{ github.run_number }}"
+          name: "NPSHARP v${{ github.run_number }}"
+          artifacts: "./release/**"
           draft: false
           prerelease: false
-
-      - name: Upload Linux Artifacts
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url || '' }}
-          asset_path: ./out/linux/*.tar.gz
-          asset_name: npsharp-linux.tar.gz
-          asset_content_type: application/gzip
-
-      - uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url || '' }}
-          asset_path: ./out/windows/*.zip
-          asset_name: npsharp-win32.zip
-          asset_content_type: application/zip
-
-      - uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url || '' }}
-          asset_path: ./out/macos/*.zip
-          asset_name: npsharp-darwin.zip
-          asset_content_type: application/zip
