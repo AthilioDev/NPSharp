@@ -26,6 +26,11 @@ jobs:
           npm install --legacy-peer-deps
       - name: Build Linux (Portable + Installer)
         run: npm run compile-build
+      - name: Debug Linux output
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Files in ./out:"
+          ls -la ./out || echo "./out does not exist!"
       - uses: actions/upload-artifact@v5
         with:
           name: linux-artifacts
@@ -47,6 +52,10 @@ jobs:
         run: npm install --legacy-peer-deps
       - name: Build Windows (Portable + Installer)
         run: npm run compile-build
+      - name: Debug Windows output
+        run: |
+          echo %CD%
+          dir .\out || echo ".\out does not exist!"
       - uses: actions/upload-artifact@v5
         with:
           name: windows-artifacts
@@ -58,10 +67,19 @@ jobs:
     needs: [build-linux, build-windows]
     steps:
       - uses: actions/checkout@v6
+      - name: Debug Release folder
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Files in ./release:"
+          ls -la ./release || echo "./release does not exist!"
       - name: Download Artifacts
         uses: actions/download-artifact@v5
         with:
           path: ./release
+      - name: List downloaded artifacts
+        run: |
+          echo "Files after download:"
+          ls -la ./release || echo "Nothing downloaded!"
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
