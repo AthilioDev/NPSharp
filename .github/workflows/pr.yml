@@ -1,12 +1,11 @@
-name: NPSHARP Build & Release
+name: NPSHARP Build • Release • Deploy
 
 permissions:
   contents: write
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -15,16 +14,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22.15.1
-
-      - name: Verify Node
-        run: |
-          node -v
-          npm -v
+          node-version: 22
 
       - name: Install dependencies
         run: |
@@ -32,110 +26,112 @@ jobs:
           sudo apt install -y build-essential libx11-dev libxkbfile-dev libnotify-bin pkg-config libkrb5-dev
           npm install --legacy-peer-deps
 
-      - name: Build Linux (Portable + Installer)
+      - name: Build Linux
         run: npm run compile-build
 
-      - name: Find build folder (AUTO)
+      - name: Find build folder
         run: |
-          echo "Procurando pasta de build..."
-          BUILD_DIR=$(find ../ -maxdepth 3 -type d \( -name "*linux*" -o -name "*build*" -o -name "*x64*" -o -name "dist" \) | head -n 1)
+          BUILD_DIR=$(find . -maxdepth 4 -type d -name "dist" -o -name "build" | head -n 1)
+          echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_ENV
 
-          if [ -z "$BUILD_DIR" ]; then
-            echo "Nenhuma pasta encontrada!"
-            find ../ -maxdepth 3 -type d
-            exit 1
-          fi
-
-          echo "Pasta encontrada: $BUILD_DIR"
-
-          mkdir -p out
-          cp -R "$BUILD_DIR"/* out/
-
-      - name: Debug Linux output
+      - name: Package Linux ZIP
         run: |
-          echo "Arquivos em ./out:"
-          ls -la out
+          mkdir -p artifacts
+          zip -r artifacts/Linux.zip "$BUILD_DIR"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts
-          path: ./out
+          name: Linux
+          path: artifacts/Linux.zip
 
   build-windows:
     name: Build Windows
     runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22.15.1
-
-      - name: Verify Node
-        run: |
-          node -v
-          npm -v
+          node-version: 22
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build Windows (Portable + Installer)
+      - name: Build Windows
         run: npm run compile-build
 
-      - name: Find build folder (AUTO)
+      - name: Find build folder
         shell: pwsh
         run: |
-          Write-Host "Procurando pasta de build..."
-          $dirs = Get-ChildItem .. -Directory -Recurse | Where-Object {
-            $_.Name -match "win|x64|build|dist"
-          }
+          $dir = Get-ChildItem -Recurse -Directory |
+            Where-Object { $_.Name -match "dist|build|win" } |
+            Select-Object -First 1
+          echo "BUILD_DIR=$($dir.FullName)" >> $env:GITHUB_ENV
 
-          if ($dirs.Count -eq 0) {
-            Write-Host "Nenhuma pasta encontrada!"
-            Get-ChildItem .. -Directory -Recurse
-            exit 1
-          }
-
-          $buildDir = $dirs[0].FullName
-          Write-Host "Pasta encontrada: $buildDir"
-
-          New-Item -ItemType Directory -Force -Path out | Out-Null
-          Copy-Item -Path "$buildDir\*" -Destination "out" -Recurse -Force
-
-      - name: Debug Windows output
+      - name: Package Windows ZIP
+        shell: pwsh
         run: |
-          echo "Arquivos em .\out:"
-          dir out
+          mkdir artifacts
+          Compress-Archive -Path "$env:BUILD_DIR\*" -DestinationPath artifacts\Windows.zip
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         with:
-          name: windows-artifacts
-          path: ./out
+          name: Windows
+          path: artifacts/Windows.zip
 
   release:
-    name: Release All Artifacts
+    name: Create GitHub Release
     runs-on: ubuntu-22.04
     needs: [build-linux, build-windows]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - name: Download Artifacts
-        uses: actions/download-artifact@v5
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
           path: ./release
 
-      - name: List downloaded artifacts
-        run: |
-          echo "Arquivos baixados:"
-          ls -R ./release
+      - name: List release files
+        run: ls -R ./release
 
-      - name: Create GitHub Release
+      - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ github.run_number }}"
           name: "NPSHARP v${{ github.run_number }}"
-          artifacts: "./release/**"
+          artifacts: "./release/**/*.zip"
+          generateReleaseNotes: true
+          removeArtifacts: false
+          replacesArtifacts: true
           draft: false
-          prerelease: false
+
+  deploy:
+    name: Deploy via FTP/SFTP
+    runs-on: ubuntu-22.04
+    needs: release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./deploy-files
+
+      - name: List deploy files
+        run: ls -R ./deploy-files
+
+      - name: Deploy (FTP/SFTP Auto)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: ./deploy-files
+          server-dir: ${{ secrets.FTP_DEST }}
+          protocol: ${{ secrets.FTP_PORT == '22' && 'sftp' || 'ftp' }}
+          log-level: verbose
