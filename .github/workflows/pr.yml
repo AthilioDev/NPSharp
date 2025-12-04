@@ -103,6 +103,7 @@ jobs:
           cp -r ./deploy/linux/* ./deploy-files
 
       - name: Deploy (FTP/SFTP Auto)
+        if: ${{ secrets.FTP_HOST }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
@@ -112,3 +113,4 @@ jobs:
           local-dir: ./deploy-files
           server-dir: ${{ secrets.FTP_DEST }}
           log-level: verbose
+
