@@ -18,7 +18,7 @@ const rcedit = require('rcedit');
 
 const repoPath = path.dirname(__dirname);
 const outputRoot = path.resolve(__dirname, 'out');
-const buildPath = (arch) => path.join(outputRoot, `NPSharp-win32-${arch}`);
+const buildPath = (arch) => path.join(repoPath, `vscode-win32-${arch}`);
 const setupDir = (arch, target) => path.join(outputRoot, `win32-${arch}`, `${target}-setup`);
 const issPath = path.join(__dirname, 'win32', 'code.iss');
 const innoSetupPath = path.join(path.dirname(path.dirname(require.resolve('innosetup'))), 'bin', 'ISCC.exe');
