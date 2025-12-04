@@ -1,4 +1,4 @@
-name: NPSHARP Build & Release
+name: NPSHARP Build • Validate • Release
 
 on:
   push:
@@ -7,68 +7,194 @@ on:
   workflow_dispatch:
 
 jobs:
+
   build-linux:
     name: Build Linux
     runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22.15.1
-      - name: Verify Node
+
+      ###############################################################
+      # 🔵 VALIDAR AMBIENTE NO LINUX
+      ###############################################################
+      - name: Validate Project Structure
         run: |
-          node -v
-          npm -v
-      - name: Install dependencies
+          echo "🔍 CHECKING NODE AND NPM"
+          node -v || exit 1
+          npm -v || exit 1
+
+          echo "🔍 CHECKING package.json"
+          if [ ! -f "package.json" ]; then
+            echo "❌ ERROR: package.json not found!"
+            exit 1
+          fi
+          echo "✔ Found package.json"
+
+          echo "🔍 CHECKING gulpfile.js"
+          if [ ! -f "gulpfile.js" ]; then
+            echo "❌ ERROR: gulpfile.js not found!"
+            exit 1
+          fi
+          echo "✔ Found gulpfile.js"
+
+      - name: Install Linux Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential libx11-dev libxkbfile-dev libnotify-bin pkg-config libkrb5-dev
-          npm install --legacy-peer-deps
-      - name: Build Linux (Portable + Installer)
+          sudo apt install -y \
+            build-essential \
+            libx11-dev \
+            libxkbfile-dev \
+            libnotify-bin \
+            pkg-config \
+            libsecret-1-dev \
+            libkrb5-dev \
+            libnss3-dev
+
+      - name: Install NPM Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Validate Gulp + Tasks
+        run: |
+          npx gulp --version || (echo "❌ Gulp not installed!" && exit 1)
+          npx gulp --tasks || (echo "❌ No Gulp tasks found!" && exit 1)
+
+          echo "🔍 CHECKING NPM SCRIPT: compile"
+          if ! npm run | grep -q "compile"; then
+            echo "❌ ERROR: Missing script 'compile' in package.json"
+            exit 1
+          fi
+          echo "✔ All validations passed."
+
+      ###############################################################
+      # 🔵 BUILD LINUX
+      ###############################################################
+      - name: Compile (Linux)
         run: npm run compile
-      - uses: actions/upload-artifact@v5
+
+      - name: Build Linux (Portable)
+        run: npx gulp vscode-linux-x64
+
+      - name: Zip Linux Build
+        run: |
+          cd out
+          zip -r linux-build.zip vscode-linux-x64
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts
-          path: ./out
+          path: out/linux-build.zip
 
+
+  ###################################################################
+  # WINDOWS BUILD
+  ###################################################################
   build-windows:
     name: Build Windows
     runs-on: windows-2022
+
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22.15.1
-      - name: Verify Node
+
+      ###############################################################
+      # 🔵 VALIDAR AMBIENTE NO WINDOWS
+      ###############################################################
+      - name: Validate Project Structure
         run: |
-          node -v
-          npm -v
-      - name: Install dependencies
+          echo "🔍 Checking package.json..."
+          if (!(Test-Path "./package.json")) {
+            Write-Error "❌ package.json not found!"
+            exit 1
+          }
+          echo "✔ package.json found."
+
+          echo "🔍 Checking gulpfile.js..."
+          if (!(Test-Path "./gulpfile.js")) {
+            Write-Error "❌ gulpfile.js not found!"
+            exit 1
+          }
+          echo "✔ gulpfile.js found."
+
+      - name: Install Dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Validate Gulp + Tasks
+        run: |
+          npx gulp --version
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "❌ Gulp missing!"
+            exit 1
+          }
+
+          npx gulp --tasks
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "❌ No gulp tasks found!"
+            exit 1
+          }
+
+          echo "Checking npm script 'compile'"
+          npm run | findstr compile
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "❌ Missing compile script"
+            exit 1
+          }
+
+      ###############################################################
+      # 🔵 BUILD WINDOWS
+      ###############################################################
       - name: Compile Windows
         run: npm run compile
+
       - name: Build Portable
-        run: npm run gulp vscode-win32-x64
-      - uses: actions/upload-artifact@v5
+        run: npx gulp vscode-win32-x64
+
+      - name: Zip Windows Build
+        run: |
+          cd out
+          powershell Compress-Archive -Path vscode-win32-x64 -DestinationPath windows-build.zip
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
-          path: ./out
+          path: out/windows-build.zip
 
+
+  ###################################################################
+  # RELEASE FINAL
+  ###################################################################
   release:
     name: Release All Artifacts
     runs-on: ubuntu-22.04
     needs: [build-linux, build-windows]
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Download Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           path: ./release
+
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag_name: v${{ github.run_number }}
           name: "NPSharp Build ${{ github.run_number }}"
           files: |
-            release/linux.zip
-            release/windows.zip
+            release/**/linux-build.zip
+            release/**/windows-build.zip
