@@ -14,8 +14,8 @@ import { createDecorator } from '../../../../platform/instantiation/common/insta
 import { IEditableData } from '../../../common/views.js';
 import { IChatAgentAttachmentCapabilities, IChatAgentRequest } from './chatAgents.js';
 import { IChatEditingSession } from './chatEditingService.js';
-import { IChatRequestVariableData } from './chatModel.js';
-import { IChatProgress } from './chatService.js';
+import { IChatModel, IChatRequestVariableData } from './chatModel.js';
+import { IChatProgress, IChatService } from './chatService.js';
 
 export const enum ChatSessionStatus {
 	Failed = 0,
@@ -32,6 +32,9 @@ export interface IChatSessionCommandContribution {
 export interface IChatSessionProviderOptionItem {
 	id: string;
 	name: string;
+	description?: string;
+	locked?: boolean;
+	icon?: ThemeIcon;
 	// [key: string]: any;
 }
 
@@ -57,10 +60,9 @@ export interface IChatSessionsExtensionPoint {
 	readonly inputPlaceholder?: string;
 	readonly capabilities?: IChatAgentAttachmentCapabilities;
 	readonly commands?: IChatSessionCommandContribution[];
+	readonly canDelegate?: boolean;
 }
 export interface IChatSessionItem {
-	/** @deprecated Use {@link resource} instead */
-	id: string;
 	resource: URI;
 	label: string;
 	iconPath?: ThemeIcon;
@@ -72,13 +74,18 @@ export interface IChatSessionItem {
 		endTime?: number;
 	};
 	statistics?: {
+		files: number;
 		insertions: number;
 		deletions: number;
 	};
-
+	archived?: boolean;
+	// TODO:@osortega remove once the single-view is default
+	/** @deprecated */
+	history?: boolean;
 }
 
 export type IChatSessionHistoryItem = {
+	id?: string;
 	type: 'request';
 	prompt: string;
 	participant: string;
@@ -104,9 +111,9 @@ export interface IChatSession extends IDisposable {
 
 	/**
 	 * Session options as key-value pairs. Keys correspond to option group IDs (e.g., 'models', 'subagents')
-	 * and values are the selected option item IDs.
+	 * and values are either the selected option item IDs (string) or full option items (for locked state).
 	 */
-	readonly options?: Record<string, string>;
+	readonly options?: Record<string, string | IChatSessionProviderOptionItem>;
 
 	readonly progressObs?: IObservable<IChatProgress[]>;
 	readonly isCompleteObs?: IObservable<boolean>;
@@ -120,6 +127,7 @@ export interface IChatSession extends IDisposable {
 	requestHandler?: (
 		request: IChatAgentRequest,
 		progress: (progress: IChatProgress[]) => void,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		history: any[], // TODO: Nail down types
 		token: CancellationToken
 	) => Promise<void>;
@@ -131,6 +139,7 @@ export interface IChatSessionItemProvider {
 	provideChatSessionItems(token: CancellationToken): Promise<IChatSessionItem[]>;
 	provideNewChatSessionItem?(options: {
 		request: IChatAgentRequest;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		metadata?: any;
 	}, token: CancellationToken): Promise<IChatSessionItem>;
 }
@@ -154,8 +163,10 @@ export interface IChatSessionsService {
 	readonly onDidChangeAvailability: Event<void>;
 	readonly onDidChangeInProgress: Event<void>;
 
+	getChatSessionContribution(chatSessionType: string): IChatSessionsExtensionPoint | undefined;
+
 	registerChatSessionItemProvider(provider: IChatSessionItemProvider): IDisposable;
-	hasChatSessionItemProvider(chatSessionType: string): Promise<boolean>;
+	activateChatSessionItemProvider(chatSessionType: string): Promise<IChatSessionItemProvider | undefined>;
 	getAllChatSessionItemProviders(): IChatSessionItemProvider[];
 
 	getAllChatSessionContributions(): IChatSessionsExtensionPoint[];
@@ -168,11 +179,6 @@ export interface IChatSessionsService {
 	 * Get the list of chat session items grouped by session type.
 	 */
 	getAllChatSessionItems(token: CancellationToken): Promise<Array<{ readonly chatSessionType: string; readonly items: IChatSessionItem[] }>>;
-
-	getNewChatSessionItem(chatSessionType: string, options: {
-		request: IChatAgentRequest;
-		metadata?: any;
-	}, token: CancellationToken): Promise<IChatSessionItem>;
 
 	reportInProgress(chatSessionType: string, count: number): void;
 	getInProgress(): { displayName: string; count: number }[];
@@ -191,8 +197,13 @@ export interface IChatSessionsService {
 	getOrCreateChatSession(sessionResource: URI, token: CancellationToken): Promise<IChatSession>;
 
 	hasAnySessionOptions(sessionResource: URI): boolean;
-	getSessionOption(sessionResource: URI, optionId: string): string | undefined;
-	setSessionOption(sessionResource: URI, optionId: string, value: string): boolean;
+	getSessionOption(sessionResource: URI, optionId: string): string | IChatSessionProviderOptionItem | undefined;
+	setSessionOption(sessionResource: URI, optionId: string, value: string | IChatSessionProviderOptionItem): boolean;
+
+	/**
+	 * Fired when options for a chat session change.
+	 */
+	onDidChangeSessionOptions: Event<{ readonly resource: URI; readonly updates: ReadonlyArray<{ optionId: string; value: string }> }>;
 
 	/**
 	 * Get the capabilities for a specific session type
@@ -209,6 +220,8 @@ export interface IChatSessionsService {
 	getEditableData(sessionResource: URI): IEditableData | undefined;
 	isEditable(sessionResource: URI): boolean;
 	// #endregion
+	registerChatModelChangeListeners(chatService: IChatService, chatSessionType: string, onChange: () => void): IDisposable;
+	getSessionDescription(chatModel: IChatModel): string | undefined;
 }
 
 export const IChatSessionsService = createDecorator<IChatSessionsService>('chatSessionsService');

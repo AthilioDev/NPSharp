@@ -20,8 +20,11 @@ import { ITelemetryService } from '../../../../platform/telemetry/common/telemet
 import { IUserDataProfilesService } from '../../../../platform/userDataProfile/common/userDataProfile.js';
 import { IWorkspaceContextService } from '../../../../platform/workspace/common/workspace.js';
 import { ILifecycleService } from '../../../services/lifecycle/common/lifecycle.js';
-import { ChatModel, ISerializableChatData, ISerializableChatDataIn, ISerializableChatsData, normalizeSerializableChatData } from './chatModel.js';
-import { ChatAgentLocation, ChatModeKind } from './constants.js';
+import { awaitStatsForSession } from './chat.js';
+import { ModifiedFileEntryState } from './chatEditingService.js';
+import { ChatModel, IChatModelInputState, ISerializableChatData, ISerializableChatDataIn, ISerializableChatsData, normalizeSerializableChatData } from './chatModel.js';
+import { IChatSessionStats } from './chatService.js';
+import { ChatAgentLocation } from './constants.js';
 
 const maxPersistedSessions = 25;
 
@@ -135,7 +138,7 @@ export class ChatSessionStore extends Disposable {
 			await this.fileService.writeFile(storageLocation, VSBuffer.fromString(content));
 
 			// Write succeeded, update index
-			index.entries[session.sessionId] = getSessionMetadata(session);
+			index.entries[session.sessionId] = await getSessionMetadata(session);
 		} catch (e) {
 			this.reportError('sessionWrite', 'Error writing chat session', e);
 		}
@@ -383,12 +386,13 @@ export class ChatSessionStore extends Disposable {
 	}
 }
 
-interface IChatSessionEntryMetadata {
+export interface IChatSessionEntryMetadata {
 	sessionId: string;
 	title: string;
 	lastMessageDate: number;
-	isImported?: boolean;
 	initialLocation?: ChatAgentLocation;
+	hasPendingEdits?: boolean;
+	stats?: IChatSessionStats;
 
 	/**
 	 * This only exists because the migrated data from the storage service had empty sessions persisted, and it's impossible to know which ones are
@@ -416,7 +420,7 @@ interface IChatSessionIndexData {
 }
 
 // TODO if we update the index version:
-// Don't throw away index when moving backwards in Notepad# version. Try to recover it. But this scenario is hard.
+// Don't throw away index when moving backwards in VS Code version. Try to recover it. But this scenario is hard.
 function isChatSessionIndex(data: unknown): data is IChatSessionIndexData {
 	if (typeof data !== 'object' || data === null) {
 		return false;
@@ -440,25 +444,30 @@ function isChatSessionIndex(data: unknown): data is IChatSessionIndexData {
 	return true;
 }
 
-function getSessionMetadata(session: ChatModel | ISerializableChatData): IChatSessionEntryMetadata {
+async function getSessionMetadata(session: ChatModel | ISerializableChatData): Promise<IChatSessionEntryMetadata> {
 	const title = session.customTitle || (session instanceof ChatModel ? session.title : undefined);
+
+	let stats: IChatSessionStats | undefined;
+	if (session instanceof ChatModel) {
+		stats = await awaitStatsForSession(session);
+	}
 
 	return {
 		sessionId: session.sessionId,
 		title: title || localize('newChat', "New Chat"),
 		lastMessageDate: session.lastMessageDate,
-		isImported: session.isImported,
 		initialLocation: session.initialLocation,
-		isEmpty: session instanceof ChatModel ? session.getRequests().length === 0 : session.requests.length === 0
+		hasPendingEdits: session instanceof ChatModel ? (session.editingSession?.entries.get().some(e => e.state.get() === ModifiedFileEntryState.Modified)) : false,
+		isEmpty: session instanceof ChatModel ? session.getRequests().length === 0 : session.requests.length === 0,
+		stats
 	};
 }
 
 export interface IChatTransfer {
 	toWorkspace: URI;
 	timestampInMilliseconds: number;
-	inputValue: string;
+	inputState: IChatModelInputState | undefined;
 	location: ChatAgentLocation;
-	mode: ChatModeKind;
 }
 
 export interface IChatTransfer2 extends IChatTransfer {

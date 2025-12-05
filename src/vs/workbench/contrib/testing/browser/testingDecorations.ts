@@ -104,7 +104,7 @@ class CachedDecorations {
 		this.runByIdKey.set(key, d);
 	}
 
-	/** Finds an extension by Notepad# event ID */
+	/** Finds an extension by VS Code event ID */
 	public getById(decorationId: string) {
 		for (const d of this.runByIdKey.values()) {
 			if (d.id === decorationId) {
@@ -158,7 +158,7 @@ export class TestingDecorationService extends Disposable implements ITestingDeco
 		@IModelService private readonly modelService: IModelService,
 	) {
 		super();
-		codeEditorService.registerDecorationType('test-message-decoration', TestMessageDecoration.decorationId, {}, undefined);
+		this._register(codeEditorService.registerDecorationType('test-message-decoration', TestMessageDecoration.decorationId, {}, undefined));
 
 		this._register(modelService.onModelRemoved(e => this.decorationCache.delete(e.uri)));
 
@@ -394,7 +394,7 @@ export class TestingDecorations extends Disposable implements IEditorContributio
 	) {
 		super();
 
-		codeEditorService.registerDecorationType('test-message-decoration', TestMessageDecoration.decorationId, {}, undefined, editor);
+		this._register(codeEditorService.registerDecorationType('test-message-decoration', TestMessageDecoration.decorationId, {}, undefined, editor));
 
 		this.attachModel(editor.getModel()?.uri);
 		this._register(decorations.onDidChange(() => {

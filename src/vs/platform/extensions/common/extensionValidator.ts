@@ -352,12 +352,12 @@ export function isEngineValid(engine: string, version: string, date: ProductDate
 export function areApiProposalsCompatible(apiProposals: string[]): boolean;
 export function areApiProposalsCompatible(apiProposals: string[], notices: string[]): boolean;
 export function areApiProposalsCompatible(apiProposals: string[], productApiProposals: Readonly<{ [proposalName: string]: Readonly<{ proposal: string; version?: number }> }>): boolean;
-export function areApiProposalsCompatible(apiProposals: string[], arg1?: any): boolean {
+export function areApiProposalsCompatible(apiProposals: string[], arg1?: string[] | Readonly<{ [proposalName: string]: Readonly<{ proposal: string; version?: number }> }>): boolean {
 	if (apiProposals.length === 0) {
 		return true;
 	}
 	const notices: string[] | undefined = Array.isArray(arg1) ? arg1 : undefined;
-	const productApiProposals: Readonly<{ [proposalName: string]: Readonly<{ proposal: string; version?: number }> }> = (notices ? undefined : arg1) ?? allApiProposals;
+	const productApiProposals: Readonly<{ [proposalName: string]: Readonly<{ proposal: string; version?: number }> }> = (Array.isArray(arg1) ? undefined : arg1) ?? allApiProposals;
 	const incompatibleProposals: string[] = [];
 	const parsedProposals = parseApiProposals(apiProposals);
 	for (const { proposalName, version } of parsedProposals) {
@@ -372,9 +372,9 @@ export function areApiProposalsCompatible(apiProposals: string[], arg1?: any): b
 	if (incompatibleProposals.length) {
 		if (notices) {
 			if (incompatibleProposals.length === 1) {
-				notices.push(nls.localize('apiProposalMismatch1', "This extension is using the API proposal '{0}' that is not compatible with the current version of Notepad#.", incompatibleProposals[0]));
+				notices.push(nls.localize('apiProposalMismatch1', "This extension is using the API proposal '{0}' that is not compatible with the current version of VS Code.", incompatibleProposals[0]));
 			} else {
-				notices.push(nls.localize('apiProposalMismatch2', "This extension is using the API proposals {0} and '{1}' that are not compatible with the current version of Notepad#.",
+				notices.push(nls.localize('apiProposalMismatch2', "This extension is using the API proposals {0} and '{1}' that are not compatible with the current version of VS Code.",
 					incompatibleProposals.slice(0, incompatibleProposals.length - 1).map(p => `'${p}'`).join(', '),
 					incompatibleProposals[incompatibleProposals.length - 1]));
 			}

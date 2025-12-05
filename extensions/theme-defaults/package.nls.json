@@ -1,6 +1,6 @@
 {
 	"displayName": "Temas Padrão",
-	"description": "O visual padrão escuro e claro do notepadshar",
+	"description": "O visual padrão escuro e claro do NPSharp",
 	"darkPlusColorThemeLabel": "Dark+",
 	"darkModernThemeLabel": "Dark Modern",
 	"lightPlusColorThemeLabel": "Light+",
@@ -9,5 +9,5 @@
 	"lightColorThemeLabel": "Light (Visual Studio)",
 	"hcColorThemeLabel": "Dark High Contrast",
 	"lightHcColorThemeLabel": "Light High Contrast",
-	"minimalIconThemeLabel": "Minimal (Visual Studio Code)"
+	"minimalIconThemeLabel": "Minimal (Notepad Sharp)"
 }

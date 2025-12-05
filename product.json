@@ -20,7 +20,7 @@
 	"serverLicense": [],
 	"serverLicensePrompt": "",
 	"serverApplicationName": "npsharp-server",
-	"serverDataFolderName": ".thainaide-server",
+	"serverDataFolderName": ".npsharp-server",
 	"tunnelApplicationName": "npsharp-tunnel",
 	"win32DirName": "Notepad Sharp",
 	"win32NameVersion": "Notepad Sharp",

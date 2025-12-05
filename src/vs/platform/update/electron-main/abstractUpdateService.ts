@@ -21,7 +21,7 @@ export function createUpdateURL(platform: string, quality: string, productServic
 export type UpdateErrorClassification = {
 	owner: 'joaomoreno';
 	messageHash: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The hash of the error message.' };
-	comment: 'This is used to know how often Notepad# updates have failed.';
+	comment: 'This is used to know how often VS Code updates have failed.';
 };
 
 export abstract class AbstractUpdateService implements IUpdateService {
@@ -48,7 +48,7 @@ export abstract class AbstractUpdateService implements IUpdateService {
 	constructor(
 		@ILifecycleMainService protected readonly lifecycleMainService: ILifecycleMainService,
 		@IConfigurationService protected configurationService: IConfigurationService,
-		@IEnvironmentMainService private readonly environmentMainService: IEnvironmentMainService,
+		@IEnvironmentMainService protected environmentMainService: IEnvironmentMainService,
 		@IRequestService protected requestService: IRequestService,
 		@ILogService protected logService: ILogService,
 		@IProductService protected readonly productService: IProductService
@@ -104,6 +104,8 @@ export abstract class AbstractUpdateService implements IUpdateService {
 		}
 
 		this.setState(State.Idle(this.getUpdateType()));
+
+		await this.postInitialize();
 
 		if (updateMode === 'manual') {
 			this.logService.info('update#ctor - manual checks only; automatic updates are disabled by user preference');
@@ -227,6 +229,10 @@ export abstract class AbstractUpdateService implements IUpdateService {
 	}
 
 	protected doQuitAndInstall(): void {
+		// noop
+	}
+
+	protected async postInitialize(): Promise<void> {
 		// noop
 	}
 

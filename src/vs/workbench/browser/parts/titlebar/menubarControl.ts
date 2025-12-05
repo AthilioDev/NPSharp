@@ -45,7 +45,6 @@ import { ActivityBarPosition } from '../../../services/layout/browser/layoutServ
 
 export type IOpenRecentAction = IAction & { uri: URI; remoteAuthority?: string };
 
-
 MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 	submenu: MenuId.MenubarFileMenu,
 	title: {
@@ -126,7 +125,6 @@ MenuRegistry.appendMenuItem(MenuId.MenubarMainMenu, {
 	when: IsMacNativeContext,
 	order: 9
 });
-
 
 export abstract class MenubarControl extends Disposable {
 

@@ -255,7 +255,7 @@ export const enum ProcessPropertyType {
 	ShellIntegrationInjectionFailureReason = 'shellIntegrationInjectionFailureReason',
 }
 
-export interface IProcessProperty<T extends ProcessPropertyType> {
+export interface IProcessProperty<T extends ProcessPropertyType = ProcessPropertyType> {
 	type: T;
 	value: IProcessPropertyMap[T];
 }
@@ -301,7 +301,7 @@ export interface IPtyService {
 	readonly onProcessReplay: Event<{ id: number; event: IPtyHostProcessReplayEvent }>;
 	readonly onProcessOrphanQuestion: Event<{ id: number }>;
 	readonly onDidRequestDetach: Event<{ requestId: number; workspaceId: string; instanceId: number }>;
-	readonly onDidChangeProperty: Event<{ id: number; property: IProcessProperty<any> }>;
+	readonly onDidChangeProperty: Event<{ id: number; property: IProcessProperty }>;
 	readonly onProcessExit: Event<{ id: number; event: number | undefined }>;
 
 	createProcess(
@@ -511,7 +511,7 @@ export interface IShellLaunchConfig {
 
 	/**
 	 * A custom environment for the terminal, if this is not set the environment will be inherited
-	 * from the Notepad# process.
+	 * from the VS Code process.
 	 */
 	env?: ITerminalEnvironment;
 
@@ -581,7 +581,7 @@ export interface IShellLaunchConfig {
 	strictEnv?: boolean;
 
 	/**
-	 * Whether the terminal process environment will inherit Notepad#'s "shell environment" that may
+	 * Whether the terminal process environment will inherit VS Code's "shell environment" that may
 	 * get sourced from running a login shell depnding on how the application was launched.
 	 * Consumers that rely on development tools being present in the $PATH should set this to true.
 	 * This will overwrite the value of the inheritEnv setting.
@@ -605,7 +605,7 @@ export interface IShellLaunchConfig {
 
 	/**
 	 * Whether this terminal is not a terminal that the user directly created and uses, but rather
-	 * a terminal used to drive some Notepad# feature.
+	 * a terminal used to drive some VS Code feature.
 	 */
 	isFeatureTerminal?: boolean;
 
@@ -658,7 +658,7 @@ export interface IShellLaunchConfig {
 	 */
 	tabActions?: ITerminalTabAction[];
 	/**
-	 * Report terminal's shell environment variables to Notepad# and extensions
+	 * Report terminal's shell environment variables to VS Code and extensions
 	 */
 	shellIntegrationEnvironmentReporting?: boolean;
 
@@ -774,7 +774,7 @@ export interface ITerminalChildProcess {
 	readonly onProcessData: Event<IProcessDataEvent | string>;
 	readonly onProcessReady: Event<IProcessReadyEvent>;
 	readonly onProcessReplayComplete?: Event<void>;
-	readonly onDidChangeProperty: Event<IProcessProperty<any>>;
+	readonly onDidChangeProperty: Event<IProcessProperty>;
 	readonly onProcessExit: Event<number | undefined>;
 	readonly onRestoreCommands?: Event<ISerializedCommandDetectionCapability>;
 
@@ -817,12 +817,6 @@ export interface ITerminalChildProcess {
 	 * @param charCount The number of characters being acknowledged.
 	 */
 	acknowledgeDataEvent(charCount: number): void;
-
-	/**
-	 * Pre-assigns the command identifier that should be associated with the next command detected by
-	 * shell integration. This keeps the pty host and renderer command stores aligned.
-	 */
-	setNextCommandId(commandLine: string, commandId: string): Promise<void>;
 
 	/**
 	 * Sets the unicode version for the process, this drives the size of some characters in the
@@ -1004,7 +998,7 @@ export const enum ShellIntegrationStatus {
 	Off,
 	/** Final term shell integration sequences have been encountered. */
 	FinalTerm,
-	/** Notepad# shell integration sequences have been encountered. Supercedes FinalTerm. */
+	/** VS Code shell integration sequences have been encountered. Supercedes FinalTerm. */
 	VSCode
 }
 
@@ -1151,6 +1145,7 @@ export interface ITerminalBackend extends ITerminalBackendPtyServiceContribution
 	setTerminalLayoutInfo(layoutInfo?: ITerminalsLayoutInfoById): Promise<void>;
 	updateTitle(id: number, title: string, titleSource: TitleEventSource): Promise<void>;
 	updateIcon(id: number, userInitiated: boolean, icon: TerminalIcon, color?: string): Promise<void>;
+	setNextCommandId(id: number, commandLine: string, commandId: string): Promise<void>;
 	getTerminalLayoutInfo(): Promise<ITerminalsLayoutInfo | undefined>;
 	getPerformanceMarks(): Promise<performance.PerformanceMark[]>;
 	reduceConnectionGraceTime(): Promise<void>;

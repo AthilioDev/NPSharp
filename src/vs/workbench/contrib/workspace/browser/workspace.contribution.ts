@@ -153,8 +153,8 @@ export class WorkspaceTrustRequestHandler extends Disposable implements IWorkben
 
 			// Title
 			const message = this.useWorkspaceLanguage ?
-				localize('workspaceTrust', "Você Confia nos Autores dos arquivos nesse Espaço de Trabalho?") :
-				localize('folderTrust', "Você Confia nos Autores dos arquivos nessa Pasta?");
+				localize('workspaceTrust', "Do you trust the authors of the files in this workspace?") :
+				localize('folderTrust', "Do you trust the authors of the files in this folder?");
 
 			// Message
 			const defaultDetails = localize('immediateTrustRequestMessage', "A feature you are trying to use may be a security risk if you do not trust the source of the files or folders you currently have open.");
@@ -162,8 +162,8 @@ export class WorkspaceTrustRequestHandler extends Disposable implements IWorkben
 
 			// Buttons
 			const buttons = requestOptions?.buttons ?? [
-				{ label: this.useWorkspaceLanguage ? localize({ key: 'grantWorkspaceTrustButton', comment: ['&& denotes a mnemonic'] }, "&&Confiar no WorkSpace e Continuar") : localize({ key: 'grantFolderTrustButton', comment: ['&& denotes a mnemonic'] }, "&Confiar na Pasta e Continuar"), type: 'ContinueWithTrust' },
-				{ label: localize({ key: 'manageWorkspaceTrustButton', comment: ['&& denotes a mnemonic'] }, "&&Gerenciar"), type: 'Manage' }
+				{ label: this.useWorkspaceLanguage ? localize({ key: 'grantWorkspaceTrustButton', comment: ['&& denotes a mnemonic'] }, "&&Trust Workspace & Continue") : localize({ key: 'grantFolderTrustButton', comment: ['&& denotes a mnemonic'] }, "&&Trust Folder & Continue"), type: 'ContinueWithTrust' },
+				{ label: localize({ key: 'manageWorkspaceTrustButton', comment: ['&& denotes a mnemonic'] }, "&&Manage"), type: 'Manage' }
 			];
 
 			// Add Cancel button if not provided
@@ -179,7 +179,7 @@ export class WorkspaceTrustRequestHandler extends Disposable implements IWorkben
 					icon: Codicon.shield,
 					markdownDetails: [
 						{ markdown: new MarkdownString(details) },
-						{ markdown: new MarkdownString(localize('immediateTrustRequestLearnMore', "Se você não confia nos autores destes arquivos, não recomendamos continuar, pois os arquivos podem ser maliciosos.")) }
+						{ markdown: new MarkdownString(localize('immediateTrustRequestLearnMore', "If you don't trust the authors of these files, we do not recommend continuing as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more.")) }
 					]
 				},
 				buttons: buttons.filter(b => b.type !== 'Cancel').map(button => {
@@ -295,8 +295,8 @@ export class WorkspaceTrustUXHandler extends Disposable implements IWorkbenchCon
 					if (!addedFoldersTrustInfo.map(info => info.trusted).every(trusted => trusted)) {
 						const { confirmed } = await this.dialogService.confirm({
 							type: Severity.Info,
-							message: localize('addWorkspaceFolderMessage', "Você Confia nos autores dos arquivos nessa Pasta?"),
-							detail: localize('addWorkspaceFolderDetail', "Você está adicionando arquivos que atualmente não são confiáveis a um espaço de trabalho confiável. Você confia nos autores desses novos arquivos?"),
+							message: localize('addWorkspaceFolderMessage', "Do you trust the authors of the files in this folder?"),
+							detail: localize('addWorkspaceFolderDetail', "You are adding files that are not currently trusted to a trusted workspace. Do you trust the authors of these new files?"),
 							cancelButton: localize('no', 'No'),
 							custom: { icon: Codicon.shield }
 						});
@@ -327,12 +327,12 @@ export class WorkspaceTrustUXHandler extends Disposable implements IWorkbenchCon
 				trustOption = this.productService.aiGeneratedWorkspaceTrust.trustOption;
 				dontTrustOption = this.productService.aiGeneratedWorkspaceTrust.dontTrustOption;
 			} else {
-				console.warn('Conteúdo da caixa de diálogo de confiança do espaço de trabalho gerado por IA não disponível.');
+				console.warn('AI generated workspace trust dialog contents not available.');
 			}
 
 			const title = titleString ?? (this.useWorkspaceLanguage ?
-				localize('workspaceTrust', "Você Confia nos Autores dos arquivos nesse Espaço de Trabalho?") :
-				localize('folderTrust', "Você Confia nos Autores dos arquivos nessa Pasta?"));
+				localize('workspaceTrust', "Do you trust the authors of the files in this workspace?") :
+				localize('folderTrust', "Do you trust the authors of the files in this folder?"));
 
 			let checkboxText: string | undefined;
 			const workspaceIdentifier = toWorkspaceIdentifier(this.workspaceContextService.getWorkspace());
@@ -340,7 +340,7 @@ export class WorkspaceTrustUXHandler extends Disposable implements IWorkbenchCon
 			const isEmptyWindow = isEmptyWorkspaceIdentifier(workspaceIdentifier);
 			if (!isAiGeneratedWorkspace && this.workspaceTrustManagementService.canSetParentFolderTrust()) {
 				const name = basename(uriDirname((workspaceIdentifier as ISingleFolderWorkspaceIdentifier).uri));
-				checkboxText = localize('checkboxString', "Confiar nos autores de todos os arquivos na pasta '{0}'", name);
+				checkboxText = localize('checkboxString', "Trust the authors of all files in the parent folder '{0}'", name);
 			}
 
 			// Show Workspace Trust Start Dialog
@@ -731,7 +731,7 @@ Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration)
 			[WORKSPACE_TRUST_ENABLED]: {
 				type: 'boolean',
 				default: true,
-				description: localize('workspace.trust.description', "Controls whether or not Workspace Trust is enabled within Notepad#."),
+				description: localize('workspace.trust.description', "Controls whether or not Workspace Trust is enabled within VS Code."),
 				tags: [WORKSPACE_TRUST_SETTING_TAG],
 				scope: ConfigurationScope.APPLICATION,
 			},
@@ -777,7 +777,7 @@ Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration)
 			[WORKSPACE_TRUST_EMPTY_WINDOW]: {
 				type: 'boolean',
 				default: true,
-				markdownDescription: localize('workspace.trust.emptyWindow.description', "Controls whether or not the empty window is trusted by default within Notepad#. When used with `#{0}#`, you can enable the full functionality of Notepad# without prompting in an empty window.", WORKSPACE_TRUST_UNTRUSTED_FILES),
+				markdownDescription: localize('workspace.trust.emptyWindow.description', "Controls whether or not the empty window is trusted by default within VS Code. When used with `#{0}#`, you can enable the full functionality of VS Code without prompting in an empty window.", WORKSPACE_TRUST_UNTRUSTED_FILES),
 				tags: [WORKSPACE_TRUST_SETTING_TAG],
 				scope: ConfigurationScope.APPLICATION
 			}

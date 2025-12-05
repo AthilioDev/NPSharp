@@ -13,6 +13,7 @@ import { memoize } from '../../base/common/decorators.js';
 import { URI } from '../../base/common/uri.js';
 import { joinPath } from '../../base/common/resources.js';
 import { join } from '../../base/common/path.js';
+import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
 
 export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 
@@ -32,7 +33,7 @@ export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 	'server-data-dir': { type: 'string', cat: 'o', description: nls.localize('serverDataDir', "Specifies the directory that server data is kept in.") },
 	'telemetry-level': { type: 'string', cat: 'o', args: 'level', description: nls.localize('telemetry-level', "Sets the initial telemetry level. Valid levels are: 'off', 'crash', 'error' and 'all'. If not specified, the server will send telemetry until a client connects, it will then use the clients telemetry setting. Setting this to 'off' is equivalent to --disable-telemetry") },
 
-	/* ----- Notepad# options ---	-- */
+	/* ----- vs code options ---	-- */
 
 	'user-data-dir': OPTIONS['user-data-dir'],
 	'enable-smoke-test-driver': OPTIONS['enable-smoke-test-driver'],
@@ -45,7 +46,7 @@ export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 	'force-disable-user-env': OPTIONS['force-disable-user-env'],
 	'enable-proposed-api': OPTIONS['enable-proposed-api'],
 
-	/* ----- Notepad# web options ----- */
+	/* ----- vs code web options ----- */
 
 	'folder': { type: 'string', deprecationMessage: 'No longer supported. Folder needs to be provided in the browser URL or with `default-folder`.' },
 	'workspace': { type: 'string', deprecationMessage: 'No longer supported. Workspace needs to be provided in the browser URL or with `default-workspace`.' },
@@ -82,9 +83,11 @@ export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 
 	'enable-remote-auto-shutdown': { type: 'boolean' },
 	'remote-auto-shutdown-without-delay': { type: 'boolean' },
+	'inspect-ptyhost': { type: 'string', allowEmptyValue: true },
 
 	'use-host-proxy': { type: 'boolean' },
 	'without-browser-env-var': { type: 'boolean' },
+	'reconnection-grace-time': { type: 'string', cat: 'o', args: 'seconds', description: nls.localize('reconnection-grace-time', "Override the reconnection grace time window in seconds. Defaults to 10800 (3 hours).") },
 
 	/* ----- server cli ----- */
 
@@ -154,7 +157,7 @@ export interface ServerParsedArgs {
 
 	'disable-workspace-trust'?: boolean;
 
-	/* ----- Notepad# options ----- */
+	/* ----- vs code options ----- */
 
 	'user-data-dir'?: string;
 
@@ -170,7 +173,7 @@ export interface ServerParsedArgs {
 	'force-disable-user-env'?: boolean;
 	'enable-proposed-api'?: string[];
 
-	/* ----- Notepad# web options ----- */
+	/* ----- vs code web options ----- */
 
 	'default-workspace'?: string;
 	'default-folder'?: string;
@@ -210,9 +213,11 @@ export interface ServerParsedArgs {
 
 	'enable-remote-auto-shutdown'?: boolean;
 	'remote-auto-shutdown-without-delay'?: boolean;
+	'inspect-ptyhost'?: string;
 
 	'use-host-proxy'?: boolean;
 	'without-browser-env-var'?: boolean;
+	'reconnection-grace-time'?: string;
 
 	/* ----- server cli ----- */
 	help: boolean;
@@ -230,6 +235,7 @@ export interface IServerEnvironmentService extends INativeEnvironmentService {
 	readonly machineSettingsResource: URI;
 	readonly mcpResource: URI;
 	readonly args: ServerParsedArgs;
+	readonly reconnectionGraceTime: number;
 }
 
 export class ServerEnvironmentService extends NativeEnvironmentService implements IServerEnvironmentService {
@@ -240,4 +246,25 @@ export class ServerEnvironmentService extends NativeEnvironmentService implement
 	@memoize
 	get mcpResource(): URI { return joinPath(URI.file(join(this.userDataPath, 'User')), 'mcp.json'); }
 	override get args(): ServerParsedArgs { return super.args as ServerParsedArgs; }
+	@memoize
+	get reconnectionGraceTime(): number { return parseGraceTime(this.args['reconnection-grace-time'], ProtocolConstants.ReconnectionGraceTime); }
+}
+
+function parseGraceTime(rawValue: string | undefined, fallback: number): number {
+	if (typeof rawValue !== 'string' || rawValue.trim().length === 0) {
+		console.log(`[reconnection-grace-time] No CLI argument provided, using default: ${fallback}ms (${Math.floor(fallback / 1000)}s)`);
+		return fallback;
+	}
+	const parsedSeconds = Number(rawValue);
+	if (!isFinite(parsedSeconds) || parsedSeconds < 0) {
+		console.log(`[reconnection-grace-time] Invalid value '${rawValue}', using default: ${fallback}ms (${Math.floor(fallback / 1000)}s)`);
+		return fallback;
+	}
+	const millis = Math.floor(parsedSeconds * 1000);
+	if (!isFinite(millis) || millis > Number.MAX_SAFE_INTEGER) {
+		console.log(`[reconnection-grace-time] Value too large '${rawValue}', using default: ${fallback}ms (${Math.floor(fallback / 1000)}s)`);
+		return fallback;
+	}
+	console.log(`[reconnection-grace-time] Parsed CLI argument: ${parsedSeconds}s -> ${millis}ms`);
+	return millis;
 }

@@ -273,14 +273,13 @@
 
 	//#region Window Helpers
 
-	async function load<M, T extends ISandboxConfiguration>(esModule: string, options: ILoadOptions<T>): Promise<ILoadResult<M, T>> {
+	async function load<M, T extends ISandboxConfiguration>(options: ILoadOptions<T>): Promise<ILoadResult<M, T>> {
 
 		// Window Configuration from Preload Script
 		const configuration = await resolveWindowConfiguration<T>();
 
 		// Signal before import()
 		options?.beforeImport?.(configuration);
-
 
 		// Developer settings
 		const { enableDeveloperKeybindings, removeDeveloperKeybindingsAfterLoad, developerDeveloperKeybindingsDisposable, forceDisableShowDevtoolsOnError } = setupDeveloperKeybindings(configuration, options);
@@ -297,8 +296,14 @@
 
 		// ESM Import
 		try {
-			const result = await import(new URL(`${esModule}.js`, baseUrl).href);
+			let workbenchUrl: string;
+			if (!!safeProcess.env['VSCODE_DEV'] && globalThis._VSCODE_USE_RELATIVE_IMPORTS) {
+				workbenchUrl = '../../../workbench/workbench.desktop.main.js'; // for dev purposes only
+			} else {
+				workbenchUrl = new URL(`vs/workbench/workbench.desktop.main.js`, baseUrl).href;
+			}
 
+			const result = await import(workbenchUrl);
 			if (developerDeveloperKeybindingsDisposable && removeDeveloperKeybindingsAfterLoad) {
 				developerDeveloperKeybindingsDisposable();
 			}
@@ -450,6 +455,10 @@
 		// DEV: a blob URL that loads the CSS via a dynamic @import-rule.
 		// DEV ---------------------------------------------------------------------------------------
 
+		if (globalThis._VSCODE_DISABLE_CSS_IMPORT_MAP) {
+			return; // disabled in certain development setups
+		}
+
 		if (Array.isArray(configuration.cssModules) && configuration.cssModules.length > 0) {
 			performance.mark('code/willAddCssLoader');
 
@@ -485,7 +494,7 @@
 
 	//#endregion
 
-	const { result, configuration } = await load<IDesktopMain, INativeWindowConfiguration>('vs/workbench/workbench.desktop.main',
+	const { result, configuration } = await load<IDesktopMain, INativeWindowConfiguration>(
 		{
 			configureDeveloperSettings: function (windowConfig) {
 				return {
@@ -501,43 +510,6 @@
 
 				// Show our splash as early as possible
 				showSplash(windowConfig);
-
-				// mais uma vez, dentro de codigo durante a aula de manhã porque eu amo ela...
-				window.addEventListener('load', () => {
-					// === esconder extras ===
-					const extrasSelectors = [
-						'.explorer-viewlet',
-						'.auxiliarybar',
-						'.panel',
-						'.run-menu',
-						'.debug-menu'
-					];
-					extrasSelectors.forEach(sel => {
-						const el = document.querySelector(sel);
-						if (el instanceof HTMLElement) el.style.display = 'none';
-					});
-
-					// === toggle da activity/composite-bar ===
-					function toggleActivityBar() {
-						const activityBar = document.querySelector('.composite-bar');
-						if (activityBar instanceof HTMLElement) {
-							activityBar.style.display = activityBar.style.display === 'none' ? '' : 'block';
-						}
-					}
-
-					// intercepta o comando do menu
-					const originalExecuteCommand = (window as any).executeCommand;
-					(window as any).executeCommand = function (id: string, ...args: any[]) {
-						if (id === 'editor.action.toggleActivityBar') {
-							toggleActivityBar();
-							return;
-						}
-						return originalExecuteCommand?.call(this, id, ...args);
-					};
-				});
-
-
-
 
 				// Code windows have a `vscodeWindowId` property to identify them
 				Object.defineProperty(window, 'vscodeWindowId', {

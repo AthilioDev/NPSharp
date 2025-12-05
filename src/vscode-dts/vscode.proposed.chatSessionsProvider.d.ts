@@ -124,6 +124,11 @@ declare module 'vscode' {
 		 */
 		statistics?: {
 			/**
+			 * Number of files edited during the session.
+			 */
+			files: number;
+
+			/**
 			 * Number of insertions made during the session.
 			 */
 			insertions: number;
@@ -147,11 +152,13 @@ declare module 'vscode' {
 
 		/**
 		 * Options configured for this session as key-value pairs.
-		 * Keys correspond to option group IDs (e.g., 'models', 'subagents')
-		 * and values are the selected option item IDs.
+		 * Keys correspond to option group IDs (e.g., 'models', 'subagents').
+		 * Values can be either:
+		 * - A string (the option item ID) for backwards compatibility
+		 * - A ChatSessionProviderOptionItem object to include metadata like locked state
 		 * TODO: Strongly type the keys
 		 */
-		readonly options?: Record<string, string>;
+		readonly options?: Record<string, string | ChatSessionProviderOptionItem>;
 
 		/**
 		 * Callback invoked by the editor for a currently running response. This allows the session to push items for the
@@ -173,9 +180,38 @@ declare module 'vscode' {
 	}
 
 	/**
+	 * Event fired when chat session options change.
+	 */
+	export interface ChatSessionOptionChangeEvent {
+		/**
+		 * Identifier of the chat session being updated.
+		 */
+		readonly resource: Uri;
+		/**
+		 * Collection of option identifiers and their new values. Only the options that changed are included.
+		 */
+		readonly updates: ReadonlyArray<{
+			/**
+			 * Identifier of the option that changed (for example `model`).
+			 */
+			readonly optionId: string;
+
+			/**
+			 * The new value assigned to the option. When `undefined`, the option is cleared.
+			 */
+			readonly value: string;
+		}>;
+	}
+
+	/**
 	 * Provides the content for a chat session rendered using the native chat UI.
 	 */
 	export interface ChatSessionContentProvider {
+		/**
+		 * Event that the provider can fire to signal that the options for a chat session have changed.
+		 */
+		readonly onDidChangeChatSessionOptions?: Event<ChatSessionOptionChangeEvent>;
+
 		/**
 		 * Provides the chat session content for a given uri.
 		 *
@@ -240,10 +276,6 @@ declare module 'vscode' {
 
 	export interface ChatContext {
 		readonly chatSessionContext?: ChatSessionContext;
-		readonly chatSummary?: {
-			readonly prompt?: string;
-			readonly history?: string;
-		};
 	}
 
 	export interface ChatSessionContext {
@@ -271,6 +303,23 @@ declare module 'vscode' {
 		 * Human-readable name displayed in the UI.
 		 */
 		readonly name: string;
+
+		/**
+		 * Optional description shown in tooltips.
+		 */
+		readonly description?: string;
+
+		/**
+		 * When true, this option is locked and cannot be changed by the user.
+		 * The option will still be visible in the UI but will be disabled.
+		 * Use this when an option is set but cannot be hot-swapped (e.g., model already initialized).
+		 */
+		readonly locked?: boolean;
+
+		/**
+		 * An icon for the option item shown in UI.
+		 */
+		readonly icon?: ThemeIcon;
 	}
 
 	/**

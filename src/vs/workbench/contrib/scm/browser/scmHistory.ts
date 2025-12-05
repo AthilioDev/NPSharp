@@ -9,8 +9,12 @@ import { badgeBackground, chartsBlue, chartsPurple, foreground } from '../../../
 import { asCssVariable, ColorIdentifier, registerColor } from '../../../../platform/theme/common/colorUtils.js';
 import { ISCMHistoryItem, ISCMHistoryItemGraphNode, ISCMHistoryItemRef, ISCMHistoryItemViewModel, SCMIncomingHistoryItemId, SCMOutgoingHistoryItemId } from '../common/history.js';
 import { rot } from '../../../../base/common/numbers.js';
-import { svgElem } from '../../../../base/browser/dom.js';
+import { $, svgElem } from '../../../../base/browser/dom.js';
 import { PANEL_BACKGROUND } from '../../../common/theme.js';
+import { DisposableStore, IDisposable } from '../../../../base/common/lifecycle.js';
+import { IMarkdownString, isEmptyMarkdownString, isMarkdownString, MarkdownString } from '../../../../base/common/htmlContent.js';
+import { ThemeIcon } from '../../../../base/common/themables.js';
+import { IMarkdownRendererService } from '../../../../platform/markdown/browser/markdownRenderer.js';
 import { findLastIdx } from '../../../../base/common/arraysFind.js';
 
 export const SWIMLANE_HEIGHT = 22;
@@ -47,10 +51,16 @@ export const colorRegistry: ColorIdentifier[] = [
 ];
 
 function getLabelColorIdentifier(historyItem: ISCMHistoryItem, colorMap: Map<string, ColorIdentifier | undefined>): ColorIdentifier | undefined {
-	for (const ref of historyItem.references ?? []) {
-		const colorIdentifier = colorMap.get(ref.id);
-		if (colorIdentifier !== undefined) {
-			return colorIdentifier;
+	if (historyItem.id === SCMIncomingHistoryItemId) {
+		return historyItemRemoteRefColor;
+	} else if (historyItem.id === SCMOutgoingHistoryItemId) {
+		return historyItemRefColor;
+	} else {
+		for (const ref of historyItem.references ?? []) {
+			const colorIdentifier = colorMap.get(ref.id);
+			if (colorIdentifier !== undefined) {
+				return colorIdentifier;
+			}
 		}
 	}
 
@@ -379,7 +389,42 @@ export function toISCMHistoryItemViewModelArray(
 		} satisfies ISCMHistoryItemViewModel);
 	}
 
-	// Inject incoming/outgoing changes nodes if ahead/behind and there is a merge base
+	// Add incoming/outgoing changes history item view models. While working
+	// with the view models is a little bit more complex, we are doing this
+	// after creating the view models so that we can use the swimlane colors
+	// to add the incoming/outgoing changes history items view models to the
+	// correct swimlanes.
+	addIncomingOutgoingChangesHistoryItems(
+		viewModels,
+		currentHistoryItemRef,
+		currentHistoryItemRemoteRef,
+		addIncomingChanges,
+		addOutgoingChanges,
+		mergeBase
+	);
+
+	return viewModels;
+}
+
+export function getHistoryItemIndex(historyItemViewModel: ISCMHistoryItemViewModel): number {
+	const historyItem = historyItemViewModel.historyItem;
+	const inputSwimlanes = historyItemViewModel.inputSwimlanes;
+
+	// Find the history item in the input swimlanes
+	const inputIndex = inputSwimlanes.findIndex(node => node.id === historyItem.id);
+
+	// Circle index - use the input swimlane index if present, otherwise add it to the end
+	return inputIndex !== -1 ? inputIndex : inputSwimlanes.length;
+}
+
+function addIncomingOutgoingChangesHistoryItems(
+	viewModels: ISCMHistoryItemViewModel[],
+	currentHistoryItemRef?: ISCMHistoryItemRef,
+	currentHistoryItemRemoteRef?: ISCMHistoryItemRef,
+	addIncomingChanges?: boolean,
+	addOutgoingChanges?: boolean,
+	mergeBase?: string
+): void {
 	if (currentHistoryItemRef?.revision !== currentHistoryItemRemoteRef?.revision && mergeBase) {
 		// Incoming changes node
 		if (addIncomingChanges && currentHistoryItemRemoteRef && currentHistoryItemRemoteRef.revision !== mergeBase) {
@@ -388,45 +433,53 @@ export function toISCMHistoryItemViewModelArray(
 			const afterHistoryItemIndex = viewModels.findIndex(vm => vm.historyItem.id === mergeBase);
 
 			if (beforeHistoryItemIndex !== -1 && afterHistoryItemIndex !== -1) {
-				// Update the before node so that the incoming and outgoing swimlanes
-				// point to the `incoming-changes` node instead of the merge base
-				viewModels[beforeHistoryItemIndex] = {
-					...viewModels[beforeHistoryItemIndex],
-					inputSwimlanes: viewModels[beforeHistoryItemIndex].inputSwimlanes
-						.map(node => {
-							return node.id === mergeBase && node.color === historyItemRemoteRefColor
-								? { ...node, id: SCMIncomingHistoryItemId }
-								: node;
-						}),
-					outputSwimlanes: viewModels[beforeHistoryItemIndex].outputSwimlanes
-						.map(node => {
-							return node.id === mergeBase && node.color === historyItemRemoteRefColor
-								? { ...node, id: SCMIncomingHistoryItemId }
-								: node;
-						})
-				};
+				// There is a known edge case in which the incoming changes have already
+				// been merged. For this scenario, we will not be showing the incoming
+				// changes history item. https://github.com/microsoft/vscode/issues/276064
+				const incomingChangeMerged = viewModels[beforeHistoryItemIndex].historyItem.parentIds.length === 2 &&
+					viewModels[beforeHistoryItemIndex].historyItem.parentIds.includes(mergeBase);
 
-				// Create incoming changes node
-				const inputSwimlanes = viewModels[beforeHistoryItemIndex].outputSwimlanes.map(i => deepClone(i));
-				const outputSwimlanes = viewModels[afterHistoryItemIndex].inputSwimlanes.map(i => deepClone(i));
-				const displayIdLength = viewModels[0].historyItem.displayId?.length ?? 0;
+				if (!incomingChangeMerged) {
+					// Update the before node so that the incoming and outgoing swimlanes
+					// point to the `incoming-changes` node instead of the merge base
+					viewModels[beforeHistoryItemIndex] = {
+						...viewModels[beforeHistoryItemIndex],
+						inputSwimlanes: viewModels[beforeHistoryItemIndex].inputSwimlanes
+							.map(node => {
+								return node.id === mergeBase && node.color === historyItemRemoteRefColor
+									? { ...node, id: SCMIncomingHistoryItemId }
+									: node;
+							}),
+						outputSwimlanes: viewModels[beforeHistoryItemIndex].outputSwimlanes
+							.map(node => {
+								return node.id === mergeBase && node.color === historyItemRemoteRefColor
+									? { ...node, id: SCMIncomingHistoryItemId }
+									: node;
+							})
+					};
 
-				const incomingChangesHistoryItem = {
-					id: SCMIncomingHistoryItemId,
-					displayId: '0'.repeat(displayIdLength),
-					parentIds: [mergeBase],
-					author: currentHistoryItemRemoteRef?.name,
-					subject: localize('incomingChanges', 'Incoming Changes'),
-					message: ''
-				} satisfies ISCMHistoryItem;
+					// Create incoming changes node
+					const inputSwimlanes = viewModels[beforeHistoryItemIndex].outputSwimlanes.map(i => deepClone(i));
+					const outputSwimlanes = viewModels[afterHistoryItemIndex].inputSwimlanes.map(i => deepClone(i));
+					const displayIdLength = viewModels[0].historyItem.displayId?.length ?? 0;
 
-				// Insert incoming changes node
-				viewModels.splice(afterHistoryItemIndex, 0, {
-					historyItem: incomingChangesHistoryItem,
-					kind: 'incoming-changes',
-					inputSwimlanes,
-					outputSwimlanes
-				});
+					const incomingChangesHistoryItem = {
+						id: SCMIncomingHistoryItemId,
+						displayId: '0'.repeat(displayIdLength),
+						parentIds: [mergeBase],
+						author: currentHistoryItemRemoteRef?.name,
+						subject: localize('incomingChanges', 'Incoming Changes'),
+						message: ''
+					} satisfies ISCMHistoryItem;
+
+					// Insert incoming changes node
+					viewModels.splice(afterHistoryItemIndex, 0, {
+						historyItem: incomingChangesHistoryItem,
+						kind: 'incoming-changes',
+						inputSwimlanes,
+						outputSwimlanes
+					});
+				}
 			}
 		}
 
@@ -477,19 +530,6 @@ export function toISCMHistoryItemViewModelArray(
 			}
 		}
 	}
-
-	return viewModels;
-}
-
-export function getHistoryItemIndex(historyItemViewModel: ISCMHistoryItemViewModel): number {
-	const historyItem = historyItemViewModel.historyItem;
-	const inputSwimlanes = historyItemViewModel.inputSwimlanes;
-
-	// Find the history item in the input swimlanes
-	const inputIndex = inputSwimlanes.findIndex(node => node.id === historyItem.id);
-
-	// Circle index - use the input swimlane index if present, otherwise add it to the end
-	return inputIndex !== -1 ? inputIndex : inputSwimlanes.length;
 }
 
 export function compareHistoryItemRefs(
@@ -518,4 +558,53 @@ export function compareHistoryItemRefs(
 	const ref2Order = getHistoryItemRefOrder(ref2);
 
 	return ref1Order - ref2Order;
+}
+
+export function toHistoryItemHoverContent(markdownRendererService: IMarkdownRendererService, historyItem: ISCMHistoryItem, includeReferences: boolean): { content: string | IMarkdownString | HTMLElement; disposables: IDisposable } {
+	const disposables = new DisposableStore();
+
+	if (historyItem.tooltip === undefined) {
+		return { content: historyItem.message, disposables };
+	}
+
+	if (isMarkdownString(historyItem.tooltip)) {
+		return { content: historyItem.tooltip, disposables };
+	}
+
+	// References as "injected" into the hover here since the extension does
+	// not know that color used in the graph to render the history item at which
+	// the reference is pointing to. They are being added before the last element
+	// of the array which is assumed to contain the hover commands.
+	const tooltipSections = historyItem.tooltip.slice();
+
+	if (includeReferences && historyItem.references?.length) {
+		const markdownString = new MarkdownString('', { supportHtml: true, supportThemeIcons: true });
+
+		for (const reference of historyItem.references) {
+			const labelIconId = ThemeIcon.isThemeIcon(reference.icon) ? reference.icon.id : '';
+
+			const labelBackgroundColor = reference.color ? asCssVariable(reference.color) : asCssVariable(historyItemHoverDefaultLabelBackground);
+			const labelForegroundColor = reference.color ? asCssVariable(historyItemHoverLabelForeground) : asCssVariable(historyItemHoverDefaultLabelForeground);
+			markdownString.appendMarkdown(`<span style="color:${labelForegroundColor};background-color:${labelBackgroundColor};border-radius:10px;">&nbsp;$(${labelIconId})&nbsp;`);
+			markdownString.appendText(reference.name);
+			markdownString.appendMarkdown('&nbsp;&nbsp;</span>');
+		}
+
+		markdownString.appendMarkdown(`\n\n---\n\n`);
+		tooltipSections.splice(tooltipSections.length - 1, 0, markdownString);
+	}
+
+	// Render tooltip content
+	const hoverContainer = $('.history-item-hover-container');
+	for (const markdownString of tooltipSections) {
+		if (isEmptyMarkdownString(markdownString)) {
+			continue;
+		}
+
+		const renderedContent = markdownRendererService.render(markdownString);
+		hoverContainer.appendChild(renderedContent.element);
+		disposables.add(renderedContent);
+	}
+
+	return { content: hoverContainer, disposables };
 }

@@ -18,9 +18,10 @@ import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
 import { ILogService } from '../../../platform/log/common/log.js';
 import { IChatEditorOptions } from '../../contrib/chat/browser/chatEditor.js';
 import { ChatEditorInput } from '../../contrib/chat/browser/chatEditorInput.js';
+import { ChatViewPaneTarget, IChatWidgetService, isIChatViewViewContext } from '../../contrib/chat/browser/chat.js';
 import { IChatAgentRequest } from '../../contrib/chat/common/chatAgents.js';
-import { IChatContentInlineReference, IChatProgress } from '../../contrib/chat/common/chatService.js';
-import { IChatSession, IChatSessionContentProvider, IChatSessionHistoryItem, IChatSessionItem, IChatSessionItemProvider, IChatSessionsService } from '../../contrib/chat/common/chatSessionsService.js';
+import { IChatContentInlineReference, IChatProgress, IChatService } from '../../contrib/chat/common/chatService.js';
+import { IChatSession, IChatSessionContentProvider, IChatSessionHistoryItem, IChatSessionItem, IChatSessionItemProvider, IChatSessionProviderOptionItem, IChatSessionsService } from '../../contrib/chat/common/chatSessionsService.js';
 import { IChatRequestVariableEntry } from '../../contrib/chat/common/chatVariableEntries.js';
 import { IEditorGroupsService } from '../../services/editor/common/editorGroupsService.js';
 import { IEditorService } from '../../services/editor/common/editorService.js';
@@ -33,8 +34,8 @@ export class ObservableChatSession extends Disposable implements IChatSession {
 	readonly sessionResource: URI;
 	readonly providerHandle: number;
 	readonly history: Array<IChatSessionHistoryItem>;
-	private _options?: Record<string, string>;
-	public get options(): Record<string, string> | undefined {
+	private _options?: Record<string, string | IChatSessionProviderOptionItem>;
+	public get options(): Record<string, string | IChatSessionProviderOptionItem> | undefined {
 		return this._options;
 	}
 	private readonly _progressObservable = observableValue<IChatProgress[]>(this, []);
@@ -120,7 +121,8 @@ export class ObservableChatSession extends Disposable implements IChatSession {
 						prompt: turn.prompt,
 						participant: turn.participant,
 						command: turn.command,
-						variableData: variables ? { variables } : undefined
+						variableData: variables ? { variables } : undefined,
+						id: turn.id
 					};
 				}
 
@@ -329,6 +331,8 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 	constructor(
 		private readonly _extHostContext: IExtHostContext,
 		@IChatSessionsService private readonly _chatSessionsService: IChatSessionsService,
+		@IChatService private readonly _chatService: IChatService,
+		@IChatWidgetService private readonly _chatWidgetService: IChatWidgetService,
 		@IDialogService private readonly _dialogService: IDialogService,
 		@IEditorService private readonly _editorService: IEditorService,
 		@IEditorGroupsService private readonly editorGroupService: IEditorGroupsService,
@@ -354,7 +358,6 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 		// Register the provider handle - this tracks that a provider exists
 		const disposables = new DisposableStore();
 		const changeEmitter = disposables.add(new Emitter<void>());
-
 		const provider: IChatSessionItemProvider = {
 			chatSessionType,
 			onDidChangeChatSessionItems: changeEmitter.event,
@@ -368,10 +371,23 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 			provider,
 			onDidChangeItems: changeEmitter,
 		});
+
+		disposables.add(this._chatSessionsService.registerChatModelChangeListeners(
+			this._chatService,
+			chatSessionType,
+			() => changeEmitter.fire()
+		));
 	}
+
 
 	$onDidChangeChatSessionItems(handle: number): void {
 		this._itemProvidersRegistrations.get(handle)?.onDidChangeItems.fire();
+	}
+
+	$onDidChangeChatSessionOptions(handle: number, sessionResourceComponents: UriComponents, updates: ReadonlyArray<{ optionId: string; value: string }>): void {
+		const sessionResource = URI.revive(sessionResourceComponents);
+
+		this._chatSessionsService.notifySessionOptionsChange(sessionResource, updates);
 	}
 
 	async $onDidCommitChatSessionItem(handle: number, originalComponents: UriComponents, modifiedCompoennts: UriComponents): Promise<void> {
@@ -418,9 +434,13 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 					options,
 				},
 			}], originalGroup);
-		} else {
-			this._logService.warn(`Original chat session editor not found for resource ${originalResource.toString()}`);
-			this._editorService.openEditor({ resource: modifiedResource }, originalGroup);
+			return;
+		}
+
+		const chatViewWidget = this._chatWidgetService.getWidgetBySessionResource(originalResource);
+		if (chatViewWidget && isIChatViewViewContext(chatViewWidget.viewContext)) {
+			await this._chatSessionsService.getOrCreateChatSession(modifiedResource, CancellationToken.None);
+			await this._chatWidgetService.openSession(modifiedResource, ChatViewPaneTarget, { preserveFocus: true });
 		}
 	}
 
@@ -428,13 +448,21 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 		try {
 			// Get all results as an array from the RPC call
 			const sessions = await this._proxy.$provideChatSessionItems(handle, token);
-			return sessions.map(session => ({
-				...session,
-				id: session.id,
-				resource: URI.revive(session.resource),
-				iconPath: session.iconPath,
-				tooltip: session.tooltip ? this._reviveTooltip(session.tooltip) : undefined
-			}));
+			return sessions.map(session => {
+				const uri = URI.revive(session.resource);
+				const model = this._chatService.getSession(uri);
+				let description: string | undefined;
+				if (model) {
+					description = this._chatSessionsService.getSessionDescription(model);
+				}
+				return {
+					...session,
+					resource: uri,
+					iconPath: session.iconPath,
+					tooltip: session.tooltip ? this._reviveTooltip(session.tooltip) : undefined,
+					description: description || session.description
+				};
+			});
 		} catch (error) {
 			this._logService.error('Error providing chat sessions:', error);
 		}
@@ -449,7 +477,6 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 			}
 			return {
 				...chatSessionItem,
-				id: chatSessionItem.id,
 				resource: URI.revive(chatSessionItem.resource),
 				iconPath: chatSessionItem.iconPath,
 				tooltip: chatSessionItem.tooltip ? this._reviveTooltip(chatSessionItem.tooltip) : undefined,
@@ -492,7 +519,6 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
 					}
 				}
 			}
-
 			return session;
 		} catch (error) {
 			session.dispose();
