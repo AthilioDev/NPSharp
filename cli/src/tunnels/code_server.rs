@@ -74,6 +74,8 @@ pub struct CodeServerArgs {
 	pub connection_token: Option<String>,
 	pub connection_token_file: Option<String>,
 	pub without_connection_token: bool,
+	// reconnection
+	pub reconnection_grace_time: Option<u32>,
 }
 
 impl CodeServerArgs {
@@ -119,6 +121,9 @@ impl CodeServerArgs {
 		}
 		if let Some(i) = self.log {
 			args.push(format!("--log={i}"));
+		}
+		if let Some(t) = self.reconnection_grace_time {
+			args.push(format!("--reconnection-grace-time={t}"));
 		}
 
 		for extension in &self.install_extensions {
@@ -171,7 +176,7 @@ pub struct ServerParamsRaw {
 	pub platform: Platform,
 }
 
-/// Server params that can be used to start a Notepad# server.
+/// Server params that can be used to start a VS Code server.
 pub struct ResolvedServerParams {
 	pub release: Release,
 	pub code_server_args: CodeServerArgs,
@@ -736,7 +741,7 @@ fn get_extensions_flag(extension_id: &str) -> String {
 	format!("--install-extension={extension_id}")
 }
 
-/// A type that can be used to scan stdout from the Notepad# server. Returns
+/// A type that can be used to scan stdout from the VS Code server. Returns
 /// some other type that, in turn, is returned from starting the server.
 pub trait ServerOutputMatcher<R>
 where

@@ -8,7 +8,7 @@ import { gracefulify } from 'graceful-fs';
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as os from 'os';
-import * as minimist from 'minimist';
+import minimist from 'minimist';
 import * as vscodetest from '@vscode/test-electron';
 import fetch from 'node-fetch';
 import { Quality, MultiLogger, Logger, ConsoleLogger, FileLogger, measureAndLog, getDevElectronPath, getBuildElectronPath, getBuildVersion, ApplicationOptions } from '../../automation';
@@ -289,7 +289,7 @@ async function ensureStableCode(): Promise<void> {
 			throw new Error(`Could not find suitable stable version for ${version}`);
 		}
 
-		logger.log(`Found Notepad# v${version}, downloading previous Notepad# version ${stableVersion}...`);
+		logger.log(`Found VS Code v${version}, downloading previous VS Code version ${stableVersion}...`);
 
 		let lastProgressMessage: string | undefined = undefined;
 		let lastProgressReportedAt = 0;

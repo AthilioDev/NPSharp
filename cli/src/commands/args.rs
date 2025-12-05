@@ -178,7 +178,7 @@ pub enum Commands {
 	/// Changes the version of the editor you're using.
 	Version(VersionArgs),
 
-	/// Runs a local web version of Notepad#.
+	/// Runs a local web version of VS Code.
 	#[clap(about = concatcp!("Runs a local web version of ", constants::PRODUCT_NAME_LONG))]
 	ServeWeb(ServeWebArgs),
 
@@ -686,6 +686,10 @@ pub struct BaseServerArgs {
 	/// Set the root path for extensions.
 	#[clap(long)]
 	pub extensions_dir: Option<String>,
+
+	/// Reconnection grace time in seconds. Defaults to 10800 (3 hours).
+	#[clap(long)]
+	pub reconnection_grace_time: Option<u32>,
 }
 
 impl BaseServerArgs {
@@ -699,6 +703,10 @@ impl BaseServerArgs {
 
 		if let Some(d) = &self.extensions_dir {
 			csa.extensions_dir = Some(d.clone());
+		}
+
+		if let Some(t) = self.reconnection_grace_time {
+			csa.reconnection_grace_time = Some(t);
 		}
 	}
 }
