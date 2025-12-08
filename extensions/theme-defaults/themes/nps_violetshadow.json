@@ -3,11 +3,11 @@
   "name": "Violet Shadow",
   "type": "dark",
   "colors": {
-    "editor.background": "#2D003E",          // roxo profundo puro
-    "editor.foreground": "#E6CFFF",          // lilás suave e limpo
-    "editorCursor.foreground": "#FF66FF",    // rosa vibrante, puro
-    "editor.lineHighlightBackground": "#00000000", // sem sombra, fundo invisível
-    "editor.selectionBackground": "#FF66FF33",     // rosa translúcido sobre código
+    "editor.background": "#2D003E",
+    "editor.foreground": "#E6CFFF",
+    "editorCursor.foreground": "#FF66FF",
+    "editor.lineHighlightBackground": "#00000000",
+    "editor.selectionBackground": "#FF66FF33",
   },
   "tokenColors": [
     {

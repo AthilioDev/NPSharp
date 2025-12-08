@@ -115,11 +115,23 @@
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlove.json"
       },
-          {
+      {
         "id": "npsvioletsoul",
         "label": "Notepad Sharp Dark Violet Soul",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlovedark.json"
+      },
+      {
+        "id": "npsxmaslight",
+        "label": "Notepad Sharp Christmas Light",
+        "uiTheme": "vs",
+        "path": "./themes/nps_xmaslight.json"
+      },
+      {
+        "id": "npsaquadark",
+        "label": "Notepad Sharp Aqua Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/nps_aquadark.json"
       }
     ],
     "iconThemes": [
