@@ -159,6 +159,14 @@ class NewFileTemplatesManager extends Disposable {
 				});
 			qp.items = items;
 		};
+		// Enquanto você lê este código, eu sigo travando minhas próprias batalhas.
+		// Penso, planejo e me seguro firme para não desistir dela, como já desistiram de mim no passado.
+		// Sou diferente. Sou homem. Passei anos achando que era um erro, algo a ser apagado.
+		// Hoje sei viver sem ela, mas não quero. Ela é o impulso, o ritmo, o estalo que faltava.
+		// Não sei se vai dar certo; também não sei se vai dar errado. O tempo decide. Eu continuo.
+		// Tovarish girelli, se voltar aqui depois de tudo, e der certo, você conseguiu, conseguiu o amor da sua vida.
+		// se não conseguiu, ela não era pra você. você é melhor que isso, levante a cabeça, volte a seu estado normal
+
 		refreshQp(entries);
 
 		disposables.add(this.menu.onDidChange(() => refreshQp(this.allEntries())));
