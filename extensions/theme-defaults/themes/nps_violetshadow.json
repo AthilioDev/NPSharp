@@ -8,8 +8,6 @@
     "editorCursor.foreground": "#FF66FF",    // rosa vibrante, puro
     "editor.lineHighlightBackground": "#00000000", // sem sombra, fundo invisível
     "editor.selectionBackground": "#FF66FF33",     // rosa translúcido sobre código
-    "editorIndentGuide.background": "#4A004A",
-    "editorIndentGuide.activeBackground": "#FF33FF"
   },
   "tokenColors": [
     {

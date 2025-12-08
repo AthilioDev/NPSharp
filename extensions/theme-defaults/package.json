@@ -120,12 +120,6 @@
         "label": "Notepad Sharp Dark Violet Soul",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlovedark.json"
-      },
-                {
-        "id": "npsvioletshadow",
-        "label": "Notepad Sharp Dark Violet Shadow",
-        "uiTheme": "vs-dark",
-        "path": "./themes/nps_violetshadow.json"
       }
     ],
     "iconThemes": [
