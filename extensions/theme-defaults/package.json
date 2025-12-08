@@ -110,13 +110,13 @@
         "path": "./themes/nps_emeraldviper.json"
       },
       {
-        "id": "npspustolyubiye",
+        "id": "npspinkwhisper",
         "label": "Notepad Sharp Pink Whisper",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlove.json"
       },
           {
-        "id": "npstyómnayapustolyubóv’",
+        "id": "npsvioletsoul",
         "label": "Notepad Sharp Dark Violet Soul",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlovedark.json"
