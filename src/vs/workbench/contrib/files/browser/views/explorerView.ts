@@ -1003,7 +1003,7 @@ registerAction2(class extends Action2 {
 	constructor() {
 		super({
 			id: 'workbench.files.action.createFileFromExplorer',
-			title: nls.localize('createNewFile', "New File..."),
+			title: nls.localize('createNewFile', "Novo Arquivo..."),
 			f1: false,
 			icon: Codicon.newFile,
 			precondition: CanCreateContext,

@@ -27,7 +27,7 @@ registerAction2(class extends Action2 {
 	constructor() {
 		super({
 			id: 'welcome.showNewFileEntries',
-			title: localize2('welcome.newFile', 'New File...'),
+			title: localize2('welcome.newFile', 'Novo Arquivo...'),
 			category,
 			f1: true,
 			keybinding: {
@@ -100,7 +100,7 @@ class NewFileTemplatesManager extends Disposable {
 
 		const disposables = new DisposableStore();
 		const qp = this.quickInputService.createQuickPick({ useSeparators: true });
-		qp.title = localize('newFileTitle', "New File...");
+		qp.title = localize('newFileTitle', "Novo Arquivo...");
 		qp.placeholder = localize('newFilePlaceholder', "Select File Type or Enter File Name...");
 		qp.sortByLabel = false;
 		qp.matchOnDetail = true;
