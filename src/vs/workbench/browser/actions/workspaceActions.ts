@@ -33,7 +33,7 @@ export class OpenFileAction extends Action2 {
 	constructor() {
 		super({
 			id: OpenFileAction.ID,
-			title: localize2('openFile', 'Open File...'),
+			title: localize2('openFile', 'Abrir Arquivo...'),
 			category: Categories.File,
 			f1: true,
 			keybinding: {
@@ -340,7 +340,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
 	group: '2_open',
 	command: {
 		id: OpenFileAction.ID,
-		title: localize({ key: 'miOpenFile', comment: ['&& denotes a mnemonic'] }, "&&Open File...")
+		title: localize({ key: 'miOpenFile', comment: ['&& denotes a mnemonic'] }, "&&Abrir Arquivo...")
 	},
 	order: 1,
 	when: IsMacNativeContext.toNegated()
@@ -350,7 +350,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
 	group: '2_open',
 	command: {
 		id: OpenFolderAction.ID,
-		title: localize({ key: 'miOpenFolder', comment: ['&& denotes a mnemonic'] }, "Open &&Folder...")
+		title: localize({ key: 'miOpenFolder', comment: ['&& denotes a mnemonic'] }, "Abrir &&Pasta...")
 	},
 	order: 2,
 	when: OpenFolderWorkspaceSupportContext
@@ -360,7 +360,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
 	group: '2_open',
 	command: {
 		id: OpenFolderViaWorkspaceAction.ID,
-		title: localize({ key: 'miOpenFolder', comment: ['&& denotes a mnemonic'] }, "Open &&Folder...")
+		title: localize({ key: 'miOpenFolder', comment: ['&& denotes a mnemonic'] }, "Abrir &&Pasta...")
 	},
 	order: 2,
 	when: ContextKeyExpr.and(OpenFolderWorkspaceSupportContext.toNegated(), WorkbenchStateContext.isEqualTo('workspace'))
@@ -370,7 +370,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
 	group: '2_open',
 	command: {
 		id: OpenFileFolderAction.ID,
-		title: localize({ key: 'miOpen', comment: ['&& denotes a mnemonic'] }, "&&Open...")
+		title: localize({ key: 'miOpen', comment: ['&& denotes a mnemonic'] }, "&&Abrir...")
 	},
 	order: 1,
 	when: ContextKeyExpr.and(IsMacNativeContext, OpenFolderWorkspaceSupportContext)
