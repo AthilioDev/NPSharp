@@ -111,13 +111,13 @@
       },
       {
         "id": "npspustolyubiye",
-        "label": "Notepad Sharp Void Love",
+        "label": "Notepad Sharp Pink Whisper",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlove.json"
       },
           {
         "id": "npstyómnayapustolyubóv’",
-        "label": "Notepad Sharp Void Love Dark",
+        "label": "Notepad Sharp Dark Violet Soul",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_voidlovedark.json"
       }
