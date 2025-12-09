@@ -132,6 +132,12 @@
         "label": "Notepad Sharp Aqua Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_aquadark.json"
+      },
+            {
+        "id": "npsteste",
+        "label": "Notepad Sharp teste",
+        "uiTheme": "vs-dark",
+        "path": "./themes/nps_teste.json"
       }
     ],
     "iconThemes": [

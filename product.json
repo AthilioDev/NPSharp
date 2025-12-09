@@ -11,7 +11,7 @@
 		"webApiUrl": "https://marketplace.visualstudio.com/_apis/public/gallery"
 	},
 	"extensionSignatureVerification": false,
-	"dataFolderName": ".NPSharp",
+	"dataFolderName": ".thainaide",
 	"win32MutexName": "npsharp",
 	"licenseName": "MIT",
 	"licenseUrl": "https://github.com/GirelliDev/NPSharp/blob/main/LICENSE.txt",
@@ -20,7 +20,7 @@
 	"serverLicense": [],
 	"serverLicensePrompt": "",
 	"serverApplicationName": "npsharp-server",
-	"serverDataFolderName": ".npsharp-server",
+	"serverDataFolderName": ".thainaide-server",
 	"tunnelApplicationName": "npsharp-tunnel",
 	"win32DirName": "Notepad Sharp",
 	"win32NameVersion": "Notepad Sharp",
