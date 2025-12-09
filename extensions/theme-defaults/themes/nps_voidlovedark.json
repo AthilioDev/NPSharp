@@ -1,7 +1,7 @@
 {
   "$schema": "vscode://schemas/color-theme",
   "type": "dark",
-  "name": "Thainá’s Violet Shadow Purity – roxo intenso, presença pura e harmoniosa",
+  "name": "Violet Shadow",
   "colors": {
     "foreground": "#EAD8FF",
     "editor.background": "#07001F",
