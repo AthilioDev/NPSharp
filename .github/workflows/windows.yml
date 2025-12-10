@@ -1,4 +1,4 @@
-name: NPSHARP • Windows VSCode Build
+name: NPSHARP • Windows NPSharp Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build VSCode Windows (Portable)
+    name: Build NPSharp Windows (Portable)
     runs-on: windows-2022
 
     steps:
@@ -27,12 +27,12 @@ jobs:
         shell: pwsh
         run: |
           if (!(Test-Path "package.json")) {
-            Write-Error "❌ package.json não encontrado"
+            Write-Error "package.json não encontrado"
             exit 1
           }
 
           if (!(Test-Path "gulpfile.mjs")) {
-            Write-Error "❌ gulpfile.js não encontrado"
+            Write-Error "gulpfile.js não encontrado"
             exit 1
           }
 
@@ -52,32 +52,44 @@ jobs:
       - name: Compile
         run: npm run compile
 
-      - name: Build VSCode Windows
+      - name: Build NPSharp Windows
         run: npm run gulp vscode-win32-x64
 
       # -------------------------
+      # ZIP
+      # -------------------------
 
-      - name: Find and Zip VSCode Build
+      - name: Zip Real NPSharp Portable Build
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
 
-          Write-Host "🔍 Procurando build a partir de: $root"
+          # Caminhos mais comuns do VSCode build
+          $paths = @(
+            "$root\VSCode-win32-x64",
+            "$root\.build\VSCode-win32-x64",
+            "$root\out\VSCode-win32-x64",
+            "$root\dist\VSCode-win32-x64"
+          )
 
-          # Procura qualquer pasta vscode-win32-x64
-          $dir = Get-ChildItem -Path $root -Recurse -Directory |
-            Where-Object { $_.Name -like "*win32-x64*" } |
-            Select-Object -First 1
+          $found = $null
 
-          if (!$dir) {
-            Write-Error "❌ Build não encontrada em nenhum lugar"
+          foreach ($p in $paths) {
+            if (Test-Path $p) {
+              $found = $p
+              break
+            }
+          }
+
+          if (!$found) {
+            Write-Error "Build portable real não encontrada"
             exit 1
           }
 
-          Write-Host "✅ Build encontrada em: $($dir.FullName)"
+          Write-Host "Build real em: $found"
 
-          $zipPath = Join-Path $root "vscode-windows-build.zip"
-          Compress-Archive -Path $dir.FullName -DestinationPath $zipPath
+          Compress-Archive -Path "$found\*" -DestinationPath "$root\vscode-windows-build.zip"
+
       # -------------------------
       # UPLOAD DO ARTEFATO
       # -------------------------
