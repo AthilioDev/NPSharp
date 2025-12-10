@@ -60,14 +60,18 @@ jobs:
 
       # -------------------------
       # EMPACOTAR BUILD
-      # -------------------------
       - name: Zip Windows Build
         shell: pwsh
         run: |
-          cd out
+          $outPath = Join-Path $PWD "out"
+          Set-Location $outPath
+
           $dir = Get-ChildItem -Directory | Select-Object -First 1
-          Write-Host "📦 Encontrado build: $($dir.Name)"
-          Compress-Archive -Path $dir.Name -DestinationPath vscode-windows-build.zip
+          Write-Host "📦 Build encontrado: $($dir.Name)"
+
+          $zipPath = Join-Path $outPath "vscode-windows-build.zip"
+          Compress-Archive -Path $dir.Name -DestinationPath $zipPath
+
 
 
       # -------------------------
