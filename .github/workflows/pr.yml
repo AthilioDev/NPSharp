@@ -46,9 +46,6 @@ jobs:
         shell: pwsh
         run: |
 
-      # -------------------------
-      # COMANDOS PRINCIPAIS
-      # -------------------------
       - name: Install NPM Packages
         run: npm i
 
@@ -59,21 +56,28 @@ jobs:
         run: npm run gulp vscode-win32-x64
 
       # -------------------------
-      # EMPACOTAR BUILD
-      - name: Zip Windows Build
+
+      - name: Find and Zip VSCode Build
         shell: pwsh
         run: |
-          $outPath = Join-Path $PWD "out"
-          Set-Location $outPath
+          $root = $env:GITHUB_WORKSPACE
 
-          $dir = Get-ChildItem -Directory | Select-Object -First 1
-          Write-Host "📦 Build encontrado: $($dir.Name)"
+          Write-Host "🔍 Procurando build a partir de: $root"
 
-          $zipPath = Join-Path $outPath "vscode-windows-build.zip"
-          Compress-Archive -Path $dir.Name -DestinationPath $zipPath
+          # Procura qualquer pasta vscode-win32-x64
+          $dir = Get-ChildItem -Path $root -Recurse -Directory |
+            Where-Object { $_.Name -like "*win32-x64*" } |
+            Select-Object -First 1
 
+          if (!$dir) {
+            Write-Error "❌ Build não encontrada em nenhum lugar"
+            exit 1
+          }
 
+          Write-Host "✅ Build encontrada em: $($dir.FullName)"
 
+          $zipPath = Join-Path $root "vscode-windows-build.zip"
+          Compress-Archive -Path $dir.FullName -DestinationPath $zipPath
       # -------------------------
       # UPLOAD DO ARTEFATO
       # -------------------------
@@ -81,4 +85,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vscode-windows-build
-          path: out/vscode-windows-build.zip
+          path: vscode-windows-build.zip
+
