@@ -31,7 +31,7 @@ jobs:
             exit 1
           }
 
-          if (!(Test-Path "gulpfile.js")) {
+          if (!(Test-Path "gulpfile.mjs")) {
             Write-Error "❌ gulpfile.js não encontrado"
             exit 1
           }
