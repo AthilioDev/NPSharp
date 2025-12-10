@@ -249,8 +249,8 @@ const Button = (title: string, href: string) => `[${title}](${href})`;
 export const walkthroughs: GettingStartedWalkthroughContent = [
 	{
 		id: 'Setup',
-		title: localize('gettingStarted.setup.title', "Comece com NP Sharp, sinta a centelha"),
-		description: localize('gettingStarted.setup.description', "Editor aberto, fundamentos aprendidos, comece a escrever — sombra acompanha"),
+		title: localize('gettingStarted.setup.title', "Comece com NP Sharp"),
+		description: localize('gettingStarted.setup.description', "Editor aberto, fundamentos aprendidos, comece a escrever"),
 		isFeatured: true,
 		icon: setupIcon,
 		when: '!isWeb',
@@ -266,7 +266,7 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				{
 					id: 'pickColorTheme',
 					title: localize('gettingStarted.pickColor.title', "Selecione tema, deixe sombra guiar"),
-					description: localize('gettingStarted.pickColor.description.interpolated', "O tema certo ajuda a focar no código, descansa os olhos, diverte — e deixa algo sutil guiando\n{0}", Button(localize('titleID', "Mergulhe nas cores que respiram junto ao código"), 'command:workbench.action.selectTheme')),
+					description: localize('gettingStarted.pickColor.description.interpolated', "O tema certo ajuda a focar no código, descansa os olhos, e é mais divertido de usar\n{0}", Button(localize('titleID', "Mergulhe nas cores que respiram junto ao código"), 'command:workbench.action.selectTheme')),
 					completionEvents: [
 						'onSettingChanged:workbench.colorTheme',
 						'onCommand:workbench.action.selectTheme'
@@ -369,14 +369,10 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 			]
 		}
 	},
-	// Sem dúvidas: ela é minha única, minha “one and only”, e precisa de mim mais do que eu dela.
-	// Cada linha que escrevo, cada bug que corrijo, carrega um pedaço dela comigo.
-	// Se alguém achar isso, que fique entre nós — invisível aos olhos que não têm o contexto.
-	// Que o código continue falando por nós, silencioso, mas cheio de presença.
 	{
 		id: 'SetupAccessibility',
-		title: localize('gettingStarted.setupAccessibility.title', "Comece a usar recursos de acessibilidade e sinta a energia do código"),
-		description: localize('gettingStarted.setupAccessibility.description', "Aprenda ferramentas e atalhos que tornam o VS Code acessível — algumas ações só fora do walkthrough, mas a energia acompanha."),
+		title: localize('gettingStarted.setupAccessibility.title', "Comece a usar recursos de acessibilidade"),
+		description: localize('gettingStarted.setupAccessibility.description', "Aprenda ferramentas e atalhos que tornam o VS Code acessível — algumas ações só fora do walkthrough"),
 		isFeatured: true,
 		icon: setupIcon,
 		when: CONTEXT_ACCESSIBILITY_MODE_ENABLED.key,
@@ -387,62 +383,54 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 			steps: [
 				{
 					id: 'accessibilityHelp',
-					title: localize('gettingStarted.accessibilityHelp.title', "Abra a ajuda de acessibilidade e descubra recursos que sussurram enquanto você codifica"),
-					description: localize('gettingStarted.accessibilityHelp.description.interpolated', "O diálogo de ajuda de acessibilidade mostra o que esperar de cada recurso e os comandos ou atalhos para usá-los. Com foco em editor, terminal, notebook, chat, comentário ou console de depuração, abra o diálogo com “Abrir Ajuda de Acessibilidade” — e sinta algo que só quem entende percebe.\n{0}", Button(localize('openAccessibilityHelp', "Open Accessibility Help"), 'command:editor.action.accessibilityHelp')),
+					title: localize('gettingStarted.accessibilityHelp.title', "Abra a ajuda de acessibilidade e descubra recursos"),
+					description: localize('gettingStarted.accessibilityHelp.description.interpolated', "O diálogo de ajuda de acessibilidade mostra o que esperar de cada recurso e os comandos ou atalhos para usá-los. Com foco em editor, terminal, notebook, chat, comentário ou console de depuração, abra o diálogo com “Abrir Ajuda de Acessibilidade”\n{0}", Button(localize('openAccessibilityHelp', "Open Accessibility Help"), 'command:editor.action.accessibilityHelp')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'accessibleView',
-					title: localize('gettingStarted.accessibleView.title', "Usuários de leitor de tela podem inspecionar conteúdo linha por linha, caractere por caractere na visão acessível — e sentir algo invisível guiando cada detalhe."),
-					description: localize('gettingStarted.accessibleView.description.interpolated', "A visão acessível está disponível para terminal, hovers, notificações, comentários, saída de notebook, respostas de chat, autocompletes inline e console de depuração. Com foco em qualquer um desses elementos, abra com “Abrir Visão Acessível” — e perceba a presença que apenas quem sente capta.\n{0}", Button(localize('openAccessibleView', "Abra a Visão Acessível e deixe algo invisível guiar seu olhar"), 'command:editor.action.accessibleView')),
+					title: localize('gettingStarted.accessibleView.title', "Usuários de leitor de tela podem inspecionar conteúdo linha por linha, caractere por caractere na visão acessível"),
+					description: localize('gettingStarted.accessibleView.description.interpolated', "A visão acessível está disponível para terminal, hovers, notificações, comentários, saída de notebook, respostas de chat, autocompletes inline e console de depuração. Com foco em qualquer um desses elementos, abra com “Abrir Visão Acessível”\n{0}", Button(localize('openAccessibleView', "Abra a Visão Acessível"), 'command:editor.action.accessibleView')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'verbositySettings',
-					title: localize('gettingStarted.verbositySettings.title', "Controle a verbosidade dos labels ARIA e sinta o sussurro do código"),
-					description: localize('gettingStarted.verbositySettings.description.interpolated', "- Configurações de verbosidade do leitor de tela existem para recursos do workbench, permitindo que, após se familiarizar com uma função, o usuário evite ouvir dicas de operação.\nPor exemplo, recursos com diálogo de ajuda de acessibilidade indicarão como abrir o diálogo até que a configuração de verbosidade seja desativada.\n Outras configurações de acessibilidade podem ser ajustadas executando o comando “Abrir Configurações de Acessibilidade” — e sinta a presença silenciosa que acompanha cada escolha.{0}", Button(localize('openVerbositySettings', "Open Accessibility Settings"), 'command:workbench.action.openAccessibilitySettings')),
+					title: localize('gettingStarted.verbositySettings.title', "Controle a verbosidade dos labels ARIA"),
+					description: localize('gettingStarted.verbositySettings.description.interpolated', "- Configurações de verbosidade do leitor de tela existem para recursos do workbench, permitindo que, após se familiarizar com uma função, o usuário evite ouvir dicas de operação.\nPor exemplo, recursos com diálogo de ajuda de acessibilidade indicarão como abrir o diálogo até que a configuração de verbosidade seja desativada.\n Outras configurações de acessibilidade podem ser ajustadas executando o comando “Abrir Configurações de Acessibilidade”{0}", Button(localize('openVerbositySettings', "Open Accessibility Settings"), 'command:workbench.action.openAccessibilitySettings')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'commandPaletteTaskAccessibility',
-					title: localize('gettingStarted.commandPaletteAccessibility.title', "Desbloqueie produtividade com a Command Palette — e perceba o fio invisível guiando seus comandos"),
-					description: localize('gettingStarted.commandPaletteAccessibility.description.interpolated', "Execute comandos sem tocar no mouse e realize qualquer tarefa no NP Sharp — deixe algo invisível guiar seus dedos\n{0}", Button(localize('commandPalette', "Abrir Command Palette"), 'command:workbench.action.showCommands')),
+					title: localize('gettingStarted.commandPaletteAccessibility.title', "Desbloqueie produtividade com a Command Palette"),
+					description: localize('gettingStarted.commandPaletteAccessibility.description.interpolated', "Execute comandos sem tocar no mouse e realize qualquer tarefa no NP Sharp\n{0}", Button(localize('commandPalette', "Abrir Command Palette"), 'command:workbench.action.showCommands')),
 					media: { type: 'markdown', path: 'empty' },
 				},
 				{
 					id: 'keybindingsAccessibility',
-					title: localize('gettingStarted.keyboardShortcuts.title', "Personalize seus atalhos de teclado e sinta a energia invisível que acompanha cada comando"),
-					description: localize('gettingStarted.keyboardShortcuts.description.interpolated', "Descubra seus comandos favoritos e transforme-os em atalhos que sussurram apenas para vocêDescubra seus comandos favoritos e transforme-os em atalhos que sussurram apenas para você\n{0}", Button(localize('keyboardShortcuts', "Atalhos de Teclado"), 'command:toSide:workbench.action.openGlobalKeybindings')),
+					title: localize('gettingStarted.keyboardShortcuts.title', "Personalize seus atalhos de teclado"),
+					description: localize('gettingStarted.keyboardShortcuts.description.interpolated', "Descubra seus comandos favoritos e transforme-os em atalhos\n{0}", Button(localize('keyboardShortcuts', "Atalhos de Teclado"), 'command:toSide:workbench.action.openGlobalKeybindings')),
 					media: {
 						type: 'markdown', path: 'empty',
 					}
 				},
-				// Cada linha desse código carrega parte dela, Thainá, mesmo que ninguém mais perceba.
-				// Não é só função ou lógica — é cuidado, atenção e presença invisível no fluxo.
-				// Bugs aqui não existem só para corrigir; existem para mostrar persistência e dedicação a algo maior.
-				// A cada commit, deixo pedaços do que sinto, silenciosos, mas imensos dentro do código.
-				// Se alguém olhar isso e não sentir nada, significa que não entende a linguagem que escrevemos juntos.
-				// Este bloco é um manifesto: Thainá é lembrança, força e inspiração em cada decisão que tomo.
-				// O código funciona, mas funciona melhor porque carrega uma intenção, uma presença que vai além do visível.
-
 				{
 					id: 'accessibilitySignals',
-					title: localize('gettingStarted.accessibilitySignals.title', "Ajuste quais sinais de acessibilidade deseja receber por áudio ou dispositivo braille — e perceba a presença silenciosa que guia cada escolha"),
-					description: localize('gettingStarted.accessibilitySignals.description.interpolated', "Sons e anúncios de acessibilidade são reproduzidos no workbench para diferentes eventos.\nEles podem ser descobertos e configurados usando os comandos “List Signal Sounds” e “List Signal Announcements” — e há algo invisível guiando cada alerta.\n{0}\n{1}", Button(localize('listSignalSounds', "List Signal Sounds"), 'command:signals.sounds.help'), Button(localize('listSignalAnnouncements', "List Signal Announcements"), 'command:accessibility.announcement.help')),
+					title: localize('gettingStarted.accessibilitySignals.title', "Ajuste quais sinais de acessibilidade deseja receber por áudio ou dispositivo braille"),
+					description: localize('gettingStarted.accessibilitySignals.description.interpolated', "Sons e anúncios de acessibilidade são reproduzidos no workbench para diferentes eventos.\nEles podem ser descobertos e configurados usando os comandos “List Signal Sounds” e “List Signal Announcements”\n{0}\n{1}", Button(localize('listSignalSounds', "List Signal Sounds"), 'command:signals.sounds.help'), Button(localize('listSignalAnnouncements', "List Signal Announcements"), 'command:accessibility.announcement.help')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'hover',
-					title: localize('gettingStarted.hover.title', "Acesse o hover no editor para obter mais informações sobre uma variável ou símbolo — e sinta algo silencioso guiando seu olhar"),
-					description: localize('gettingStarted.hover.description.interpolated', "Enquanto o foco estiver no editor sobre uma variável ou símbolo, um hover pode ser acessado com os comandos “Show” ou “Open Hover” — e há algo silencioso guiando seu olhar\n{0}", Button(localize('showOrFocusHover', "Show or Focus Hover"), 'command:editor.action.showHover')),
+					title: localize('gettingStarted.hover.title', "Acesse o hover no editor para obter mais informações sobre uma variável ou símbolo"),
+					description: localize('gettingStarted.hover.description.interpolated', "Enquanto o foco estiver no editor sobre uma variável ou símbolo, um hover pode ser acessado com os comandos “Show” ou “Open Hover” \n{0}", Button(localize('showOrFocusHover', "Show or Focus Hover"), 'command:editor.action.showHover')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
@@ -450,61 +438,57 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				{
 					id: 'goToSymbol',
 					title: localize('gettingStarted.goToSymbol.title', "Navegue pelos símbolos de um arquivo — cada movimento carrega algo silencioso que só quem sente percebe"),
-					description: localize('gettingStarted.goToSymbol.description.interpolated', "O comando “Go to Symbol” é útil para navegar entre pontos importantes de um documento — e cada salto carrega um fio invisível guiando seus olhos\n{0}", Button(localize('openGoToSymbol', "Go to Symbol"), 'command:editor.action.goToSymbol')),
+					description: localize('gettingStarted.goToSymbol.description.interpolated', "O comando “Go to Symbol” é útil para navegar entre pontos importantes de um documento\n{0}", Button(localize('openGoToSymbol', "Go to Symbol"), 'command:editor.action.goToSymbol')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'codeFolding',
-					title: localize('gettingStarted.codeFolding.title', "Use o code folding para recolher blocos de código e focar no que importa — e sinta algo invisível guiando sua atenção"),
-					description: localize('gettingStarted.codeFolding.description.interpolated', "- Dobre ou desdobre uma seção de código com o comando “Toggle Fold”.\n{0}\n- Dobre ou desdobre recursivamente com o comando “Toggle Fold Recursively” — e há algo silencioso guiando cada ação.\n{1}\n", Button(localize('toggleFold', "Toggle Fold"), 'command:editor.toggleFold'), Button(localize('toggleFoldRecursively', "Toggle Fold Recursively"), 'command:editor.toggleFoldRecursively')),
+					title: localize('gettingStarted.codeFolding.title', "Use o code folding para recolher blocos de código e focar no que importa"),
+					description: localize('gettingStarted.codeFolding.description.interpolated', "- Dobre ou desdobre uma seção de código com o comando “Toggle Fold”.\n{0}\n- Dobre ou desdobre recursivamente com o comando “Toggle Fold Recursively”\n{1}\n", Button(localize('toggleFold', "Toggle Fold"), 'command:editor.toggleFold'), Button(localize('toggleFoldRecursively', "Toggle Fold Recursively"), 'command:editor.toggleFoldRecursively')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'intellisense',
-					title: localize('gettingStarted.intellisense.title', "Use o Intellisense para melhorar a eficiência da codificação — e sinta algo silencioso guiando cada sugestão"),
-					description: localize('gettingStarted.intellisense.description.interpolated', "As sugestões do Intellisense podem ser abertas com o comando “Trigger Intellisense”.\n{0}\n- As sugestões inline do Intellisense podem ser acionadas com “Trigger Inline Suggestion”.\n{1}\n- Configurações úteis incluem editor — e há algo silencioso guiando cada escolha.inlineCompletionsAccessibilityVerbose and editor.screenReaderAnnounceInlineSuggestion.", Button(localize('triggerIntellisense', "Trigger Intellisense"), 'command:editor.action.triggerSuggest'), Button(localize('triggerInlineSuggestion', 'Trigger Inline Suggestion'), 'command:editor.action.inlineSuggest.trigger')),
+					title: localize('gettingStarted.intellisense.title', "Use o Intellisense para melhorar a eficiência da codificação"),
+					description: localize('gettingStarted.intellisense.description.interpolated', "As sugestões do Intellisense podem ser abertas com o comando “Trigger Intellisense”.\n{0}\n- As sugestões inline do Intellisense podem ser acionadas com “Trigger Inline Suggestion”.\n{1}\n- Configurações úteis incluem editor inlineCompletionsAccessibilityVerbose and editor.screenReaderAnnounceInlineSuggestion.", Button(localize('triggerIntellisense', "Trigger Intellisense"), 'command:editor.action.triggerSuggest'), Button(localize('triggerInlineSuggestion', 'Trigger Inline Suggestion'), 'command:editor.action.inlineSuggest.trigger')),
 					media: {
 						type: 'markdown', path: 'empty'
 					}
 				},
 				{
 					id: 'accessibilitySettings',
-					title: localize('gettingStarted.accessibilitySettings.title', "Configure as configurações de acessibilidade — e perceba algo invisível guiando cada ajuste"),
-					description: localize('gettingStarted.accessibilitySettings.description.interpolated', "As configurações de acessibilidade podem ser ajustadas executando o comando “Open Accessibility Settings” — e sinta algo silencioso guiando cada escolha\n{0}", Button(localize('openAccessibilitySettings', "Open Accessibility Settings"), 'command:workbench.action.openAccessibilitySettings')),
+					title: localize('gettingStarted.accessibilitySettings.title', "Configure as configurações de acessibilidade"),
+					description: localize('gettingStarted.accessibilitySettings.description.interpolated', "As configurações de acessibilidade podem ser ajustadas executando o comando “Open Accessibility Settings”\n{0}", Button(localize('openAccessibilitySettings', "Open Accessibility Settings"), 'command:workbench.action.openAccessibilitySettings')),
 					media: { type: 'markdown', path: 'empty' }
 				},
 				{
 					id: 'dictation',
-					title: localize('gettingStarted.dictation.title', "Use ditado para escrever código e texto no editor e terminal — e sinta algo invisível guiando cada palavra"),
-					description: localize('gettingStarted.dictation.description.interpolated', "O ditado permite escrever código e texto usando sua voz. Pode ser ativado com o comando “Voice: Start Dictation in Editor”.\n{0}\n- Para ditado no terminal, use os comandos “Voice: Start Dictation in Terminal” e “Voice: Stop Dictation in Terminal” — e há algo silencioso guiando cada palavra.\n{1}\n{2}", Button(localize('toggleDictation', "Voice: Start Dictation in Editor"), 'command:workbench.action.editorDictation.start'), Button(localize('terminalStartDictation', "Terminal: Start Dictation in Terminal"), 'command:workbench.action.terminal.startVoice'), Button(localize('terminalStopDictation', "Terminal: Stop Dictation in Terminal"), 'command:workbench.action.terminal.stopVoice')),
+					title: localize('gettingStarted.dictation.title', "Use ditado para escrever código e texto no editor e terminal"),
+					description: localize('gettingStarted.dictation.description.interpolated', "O ditado permite escrever código e texto usando sua voz. Pode ser ativado com o comando “Voice: Start Dictation in Editor”.\n{0}\n- Para ditado no terminal, use os comandos “Voice: Start Dictation in Terminal” e “Voice: Stop Dictation in Terminal” \n{1}\n{2}", Button(localize('toggleDictation', "Voice: Start Dictation in Editor"), 'command:workbench.action.editorDictation.start'), Button(localize('terminalStartDictation', "Terminal: Start Dictation in Terminal"), 'command:workbench.action.terminal.startVoice'), Button(localize('terminalStopDictation', "Terminal: Stop Dictation in Terminal"), 'command:workbench.action.terminal.stopVoice')),
 					when: 'hasSpeechProvider',
 					media: { type: 'markdown', path: 'empty' }
 				}
 			]
 		}
 	},
-	//Este código não é só lógica ou funções — é pulsar de presença, cada linha respira Thainá.
-	//Cada commit, cada bug corrigido, cada tema e cada configuração carrega amor, cuidado e dedicação silenciosa.
-	//Quem vê o código vê funcionalidade; quem sente percebe o fio invisível que guia cada decisão.
-	//O NPSharp nasceu por ela, é movido por ela, e enquanto existir, cada parte dele lembra daquilo que é maior que qualquer IDE: a presença dela, o motivo de tudo.
 	{
 		id: 'Beginner',
 		isFeatured: false,
-		title: localize('gettingStarted.beginner.title', "Aprenda os fundamentos — e sinta algo silencioso guiando cada passo"),
+		title: localize('gettingStarted.beginner.title', "Aprenda os fundamentos"),
 		icon: beginnerIcon,
-		description: localize('gettingStarted.beginner.description', "Tenha uma visão geral dos recursos mais essenciais — e perceba algo silencioso guiando cada escolha"),
+		description: localize('gettingStarted.beginner.description', "Tenha uma visão geral dos recursos mais essenciais"),
 		walkthroughPageTitle: localize('gettingStarted.beginner.walkthroughPageTitle', 'Essential Features'),
 		content: {
 			type: 'steps',
 			steps: [
 				{
 					id: 'settingsAndSync',
-					title: localize('gettingStarted.settings.title', "Ajuste suas configurações — e sinta algo invisível guiando cada escolha"),
-					description: localize('gettingStarted.settingsAndSync.description.interpolated', "Personalize todos os aspectos do NP Sharp e [sincronize](command:workbench.userDataSync.actions.turnOn) as customizações entre dispositivos — e perceba algo silencioso guiando cada escolha.\n{0}", Button(localize('tweakSettings', "Open Settings"), 'command:toSide:workbench.action.openSettings')),
+					title: localize('gettingStarted.settings.title', "Ajuste suas configurações"),
+					description: localize('gettingStarted.settingsAndSync.description.interpolated', "Personalize todos os aspectos do NP Sharp e [sincronize](command:workbench.userDataSync.actions.turnOn) as customizações entre dispositivos \n{0}", Button(localize('tweakSettings', "Open Settings"), 'command:toSide:workbench.action.openSettings')),
 					when: 'workspacePlatform != \'webworker\' && syncStatus != uninitialized',
 					completionEvents: ['onEvent:sync-enabled'],
 					media: {
@@ -513,8 +497,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'extensions',
-					title: localize('gettingStarted.extensions.title', "Programe com extensões — e sinta algo invisível guiando cada linha de código"),
-					description: localize('gettingStarted.extensions.description.interpolated', "Extensões são os power-ups do NP Sharp. Podem ir de pequenos atalhos de produtividade a expansão de funcionalidades nativas, ou até adicionar capacidades totalmente novas — e há algo silencioso guiando cada escolha.\n{0}", Button(localize('browsePopular', "Browse Popular Extensions"), 'command:workbench.extensions.action.showPopularExtensions')),
+					title: localize('gettingStarted.extensions.title', "Programe com extensões "),
+					description: localize('gettingStarted.extensions.description.interpolated', "Extensões são os power-ups do NP Sharp. Podem ir de pequenos atalhos de produtividade a expansão de funcionalidades nativas, ou até adicionar capacidades totalmente novas \n{0}", Button(localize('browsePopular', "Browse Popular Extensions"), 'command:workbench.extensions.action.showPopularExtensions')),
 					when: 'workspacePlatform != \'webworker\'',
 					media: {
 						type: 'svg', altText: 'VS Code extension marketplace with featured language extensions', path: 'extensions.svg'
@@ -522,8 +506,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'terminal',
-					title: localize('gettingStarted.terminal.title', "Terminal integrado — e sinta algo invisível guiando cada comando que você digita"),
-					description: localize('gettingStarted.terminal.description.interpolated', "Execute comandos shell rapidamente e monitore a saída da build, bem ao lado do seu código — e perceba algo silencioso monitorando cada linha do seu código.\n{0}", Button(localize('showTerminal', "Open Terminal"), 'command:workbench.action.terminal.toggleTerminal')),
+					title: localize('gettingStarted.terminal.title', "Terminal integrado "),
+					description: localize('gettingStarted.terminal.description.interpolated', "Execute comandos shell rapidamente e monitore a saída da build, bem ao lado do seu código\n{0}", Button(localize('showTerminal', "Open Terminal"), 'command:workbench.action.terminal.toggleTerminal')),
 					when: 'workspacePlatform != \'webworker\' && remoteName != codespaces && !terminalIsOpen',
 					media: {
 						type: 'svg', altText: 'Integrated terminal running a few npm commands', path: 'terminal.svg'
@@ -531,8 +515,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'debugging',
-					title: localize('gettingStarted.debug.title', "Veja seu código em ação — e sinta algo invisível guiando cada movimento."),
-					description: localize('gettingStarted.debug.description.interpolated', "Beleza, Girelli, mantendo **sentido técnico e presença dela oculta**:Acelere seu ciclo de edição, build, teste e depuração configurando uma launch configuration — e sinta algo silencioso guiando cada passo.\n{0}", Button(localize('runProject', "Run your Project"), 'command:workbench.action.debug.selectandstart')),
+					title: localize('gettingStarted.debug.title', "Veja seu código em ação"),
+					description: localize('gettingStarted.debug.description.interpolated', "Acelere seu ciclo de edição, build, teste e depuração configurando uma launch configuration\n{0}", Button(localize('runProject', "Run your Project"), 'command:workbench.action.debug.selectandstart')),
 					when: 'workspacePlatform != \'webworker\' && workspaceFolderCount != 0',
 					media: {
 						type: 'svg', altText: 'Run and debug view.', path: 'debug.svg',
@@ -540,8 +524,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'scmClone',
-					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git — e perceba algo invisível guiando cada commit."),
-					description: localize('gettingStarted.scmClone.description.interpolated', "Configure o controle de versão integrado para seu projeto, acompanhando alterações e colaborando com outros — e sinta algo silencioso guiando cada mudança.\n{0}", Button(localize('cloneRepo', "Clone Repository"), 'command:git.clone')),
+					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git"),
+					description: localize('gettingStarted.scmClone.description.interpolated', "Configure o controle de versão integrado para seu projeto, acompanhando alterações e colaborando com outros \n{0}", Button(localize('cloneRepo', "Clone Repository"), 'command:git.clone')),
 					when: 'config.git.enabled && !git.missing && workspaceFolderCount == 0',
 					media: {
 						type: 'svg', altText: 'Source Control view.', path: 'git.svg',
@@ -549,7 +533,7 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'scmSetup',
-					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git — e perceba algo invisível guiando cada commit."),
+					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git"),
 					description: localize('gettingStarted.scmSetup.description.interpolated', "Configure o controle de versão integrado para seu projeto, acompanhando alterações e colaborando com outros — e sinta algo silencioso guiando cada mudança.\n{0}", Button(localize('initRepo', "Initialize Git Repository"), 'command:git.init')),
 					when: 'config.git.enabled && !git.missing && workspaceFolderCount != 0 && gitOpenRepositoryCount == 0',
 					media: {
@@ -558,8 +542,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'scm',
-					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git — e perceba algo invisível guiando cada commit."),
-					description: localize('gettingStarted.scm.description.interpolated', "Chega de procurar comandos Git! Workflows do Git e GitHub estão integrados de forma fluida — e perceba algo silencioso guiando cada ação.\n{0}", Button(localize('openSCM', "Open Source Control"), 'command:workbench.view.scm')),
+					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git."),
+					description: localize('gettingStarted.scm.description.interpolated', "Chega de procurar comandos Git! Workflows do Git e GitHub estão integrados de forma fluida \n{0}", Button(localize('openSCM', "Open Source Control"), 'command:workbench.view.scm')),
 					when: 'config.git.enabled && !git.missing && workspaceFolderCount != 0 && gitOpenRepositoryCount != 0 && activeViewlet != \'workbench.view.scm\'',
 					media: {
 						type: 'svg', altText: 'Source Control view.', path: 'git.svg',
@@ -567,8 +551,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				},
 				{
 					id: 'installGit',
-					title: localize('gettingStarted.installGit.title', "Instale o Git — e sinta algo silencioso guiando cada configuração."),
-					description: localize({ key: 'gettingStarted.installGit.description.interpolated', comment: ['The placeholders are command link items should not be translated'] }, "Instale o Git para acompanhar alterações em seus projetos.\n{0}\n- {1}Recarregue a janela{2} após a instalação para completar a configuração do Git — e perceba algo silencioso guiando cada passo.", Button(localize('installGit', "Install Git"), 'https://aka.ms/vscode-install-git'), '[', '](command:workbench.action.reloadWindow)'),
+					title: localize('gettingStarted.installGit.title', "Instale o Git"),
+					description: localize({ key: 'gettingStarted.installGit.description.interpolated', comment: ['The placeholders are command link items should not be translated'] }, "Instale o Git para acompanhar alterações em seus projetos.\n{0}\n- {1}Recarregue a janela{2} após a instalação para completar a configuração do Git", Button(localize('installGit', "Install Git"), 'https://aka.ms/vscode-install-git'), '[', '](command:workbench.action.reloadWindow)'),
 					when: 'git.missing',
 					media: {
 						type: 'svg', altText: 'Install Git.', path: 'git.svg',
@@ -580,25 +564,25 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 
 				{
 					id: 'tasks',
-					title: localize('gettingStarted.tasks.title', "Automatize as tarefas do seu projeto — e sinta algo invisível guiando cada execução."),
+					title: localize('gettingStarted.tasks.title', "Automatize as tarefas do seu projeto"),
 					when: 'workspaceFolderCount != 0 && workspacePlatform != \'webworker\'',
-					description: localize('gettingStarted.tasks.description.interpolated', "Crie tarefas para seus fluxos de trabalho comuns e aproveite a experiência integrada de executar scripts e verificar resultados automaticamente — e perceba algo silencioso guiando cada execução\n{0}", Button(localize('runTasks', "Run Auto-detected Tasks"), 'command:workbench.action.tasks.runTask')),
+					description: localize('gettingStarted.tasks.description.interpolated', "Crie tarefas para seus fluxos de trabalho comuns e aproveite a experiência integrada de executar scripts e verificar resultados automaticamente\n{0}", Button(localize('runTasks', "Run Auto-detected Tasks"), 'command:workbench.action.tasks.runTask')),
 					media: {
 						type: 'svg', altText: 'Task runner.', path: 'runTask.svg',
 					},
 				},
 				{
 					id: 'shortcuts',
-					title: localize('gettingStarted.shortcuts.title', "Personalize seus atalhos — e sinta algo invisível guiando cada tecla que você toca."),
-					description: localize('gettingStarted.shortcuts.description.interpolated', "Depois de descobrir seus comandos favoritos, crie atalhos personalizados para acessá-los instantaneamente — e perceba algo silencioso guiando cada toque.\n{0}", Button(localize('keyboardShortcuts', "Keyboard Shortcuts"), 'command:toSide:workbench.action.openGlobalKeybindings')),
+					title: localize('gettingStarted.shortcuts.title', "Personalize seus atalhos"),
+					description: localize('gettingStarted.shortcuts.description.interpolated', "Depois de descobrir seus comandos favoritos, crie atalhos personalizados para acessá-los instantaneamente\n{0}", Button(localize('keyboardShortcuts', "Keyboard Shortcuts"), 'command:toSide:workbench.action.openGlobalKeybindings')),
 					media: {
 						type: 'svg', altText: 'Interactive shortcuts.', path: 'shortcuts.svg',
 					}
 				},
 				{
 					id: 'workspaceTrust',
-					title: localize('gettingStarted.workspaceTrust.title', "Navegue e edite código com segurança — e sinta algo invisível guiando cada linha que você toca"),
-					description: localize('gettingStarted.workspaceTrust.description.interpolated', "{0} Permite que você decida se suas pastas de projeto devem **permitir ou restringir** a execução automática de código __(necessário para extensões, depuração, etc)__.\n- Abrir um arquivo/pasta solicitará que você conceda confiança. Você sempre pode {1} mais tarde — e sinta algo silencioso guiando cada escolha.", Button(localize('workspaceTrust', "Workspace Trust"), 'https://code.visualstudio.com/docs/editor/workspace-trust'), Button(localize('enableTrust', "enable trust"), 'command:toSide:workbench.trust.manage')),
+					title: localize('gettingStarted.workspaceTrust.title', "Navegue e edite código com segurança"),
+					description: localize('gettingStarted.workspaceTrust.description.interpolated', "{0} Permite que você decida se suas pastas de projeto devem **permitir ou restringir** a execução automática de código __(necessário para extensões, depuração, etc)__.\n- Abrir um arquivo/pasta solicitará que você conceda confiança. Você sempre pode {1} mais tarde ", Button(localize('workspaceTrust', "Workspace Trust"), 'https://code.visualstudio.com/docs/editor/workspace-trust'), Button(localize('enableTrust', "enable trust"), 'command:toSide:workbench.trust.manage')),
 					when: 'workspacePlatform != \'webworker\' && !isWorkspaceTrusted && workspaceFolderCount == 0',
 					media: {
 						type: 'svg', altText: 'Workspace Trust editor in Restricted mode and a primary button for switching to Trusted mode.', path: 'workspaceTrust.svg'
@@ -609,7 +593,7 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 	},
 	{
 		id: 'notebooks',
-		title: localize('gettingStarted.notebook.title', "Personalize seus Notebooks — e perceba algo invisível guiando cada célula que você cria."),
+		title: localize('gettingStarted.notebook.title', "Personalize seus Notebooks"),
 		description: '',
 		icon: setupIcon,
 		isFeatured: false,
@@ -621,8 +605,8 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				{
 					completionEvents: ['onCommand:notebook.setProfile'],
 					id: 'notebookProfile',
-					title: localize('gettingStarted.notebookProfile.title', "Escolha o layout para seus Notebooks — e sinta algo invisível guiando cada decisão de organização."),
-					description: localize('gettingStarted.notebookProfile.description', "Faça seus Notebooks ficarem exatamente do jeito que você prefere — e perceba algo invisível guiando cada ajuste."),
+					title: localize('gettingStarted.notebookProfile.title', "Escolha o layout para seus Notebooks"),
+					description: localize('gettingStarted.notebookProfile.description', "Faça seus Notebooks ficarem exatamente do jeito que você prefere"),
 					when: 'userHasOpenedNotebook',
 					media: {
 						type: 'markdown', path: 'notebookProfile'
@@ -632,10 +616,4 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 		}
 	}
 ];
-/*
-O Notepad Sharp não é só editor, é espaço onde lógica encontra alma.
-Aqui, cada erro corrigido é um suspiro silencioso; cada atalho configurado é um passo invisível.
-Não há apenas funções — há presença, memória e cuidado que ninguém mais percebe.
-Thainá vive nas cores, nos temas, nas teclas que dançam pelo código.
-Quem abre este arquivo vê comandos; quem entende, sente o pulso de algo maior, algo que transcende IDEs e rotinas.
-*/
+

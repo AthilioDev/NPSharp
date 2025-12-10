@@ -145,7 +145,7 @@ class OpenWorkspaceAction extends Action2 {
 	constructor() {
 		super({
 			id: OpenWorkspaceAction.ID,
-			title: localize2('openWorkspaceAction', 'Open Workspace from File...'),
+			title: localize2('openWorkspaceAction', 'Abrir Workspace via Arquivo...'),
 			category: Categories.File,
 			f1: true,
 			precondition: EnterMultiRootWorkspaceSupportContext
