@@ -44,10 +44,6 @@ jobs:
       # -------------------------
       - name: Install Windows Build Dependencies
         shell: pwsh
-        run: |
-          choco install -y python
-          npm config set msvs_version 2022
-
       # -------------------------
       # COMANDOS PRINCIPAIS
       # -------------------------
