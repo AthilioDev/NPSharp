@@ -1,4 +1,4 @@
-name: NPSHARP Build • Validate • Release
+name: NPSHARP • Windows VSCode Build
 
 on:
   push:
@@ -7,95 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-
-  build-linux:
-    name: Build Linux
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js (EXACT VERSION)
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-
-      # -------------------------
-      # VALIDAR AMBIENTE LINUX
-      # -------------------------
-      - name: Validate Project Structure
-        run: |
-          echo "🔍 Checking Node..."
-          node -v
-          echo "🔍 Checking NPM..."
-          npm -v
-
-          if [ ! -f "package.json" ]; then
-            echo "❌ ERROR: package.json not found!"
-            exit 1
-          fi
-          echo "✔ package.json"
-
-          if [ ! -f "gulpfile.js" ]; then
-            echo "❌ ERROR: gulpfile.js not found!"
-            exit 1
-          fi
-          echo "✔ gulpfile.js"
-
-      - name: Install Linux Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            build-essential \
-            libx11-dev \
-            libxkbfile-dev \
-            libnotify-bin \
-            pkg-config \
-            libsecret-1-dev \
-            libkrb5-dev \
-            libnss3-dev
-
-      - name: Install NPM Dependencies
-        run: npm install --force
-
-      - name: Validate Gulp
-        run: |
-          npx gulp --version
-          npx gulp --tasks
-
-          if ! npm run | grep -q "compile"; then
-            echo "❌ Missing compile script!"
-            exit 1
-          fi
-          echo "✔ Compile ok"
-
-      # -------------------------
-      # BUILD LINUX
-      # -------------------------
-      - name: Compile Linux
-        run: npm run compile
-
-      - name: Build Linux Portable
-        run: npx gulp vscode-linux-x64
-
-      - name: Zip Linux Build
-        run: |
-          cd out
-          zip -r linux-build.zip vscode-linux-x64
-
-      - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-artifacts
-          path: out/linux-build.zip
-
-
-  # ===================================
-  # WINDOWS BUILD
-  # ===================================
   build-windows:
-    name: Build Windows
+    name: Build VSCode Windows (Portable)
     runs-on: windows-2022
 
     steps:
@@ -107,69 +20,60 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
+      # -------------------------
+      # VALIDAR PROJETO
+      # -------------------------
       - name: Validate Project Structure
+        shell: pwsh
         run: |
-          if (!(Test-Path "./package.json")) {
-            Write-Error "❌ package.json missing"
-            exit 1
-          }
-          if (!(Test-Path "./gulpfile.js")) {
-            Write-Error "❌ gulpfile.js missing"
+          if (!(Test-Path "package.json")) {
+            Write-Error "❌ package.json não encontrado"
             exit 1
           }
 
-      - name: Install Dependencies
-        run: npm install --force
+          if (!(Test-Path "gulpfile.js")) {
+            Write-Error "❌ gulpfile.js não encontrado"
+            exit 1
+          }
 
-      - name: Validate Gulp + Compile Script
+          node -v
+          npm -v
+
+      # -------------------------
+      # DEPENDÊNCIAS DO WINDOWS
+      # -------------------------
+      - name: Install Windows Build Dependencies
+        shell: pwsh
         run: |
-          npx gulp --version
-          npx gulp --tasks
-          npm run | findstr compile
+          choco install -y python
+          npm config set msvs_version 2022
 
       # -------------------------
-      # BUILD WINDOWS
+      # COMANDOS PRINCIPAIS
       # -------------------------
-      - name: Compile Windows
+      - name: Install NPM Packages
+        run: npm i
+
+      - name: Compile
         run: npm run compile
 
-      - name: Build Portable
-        run: npx gulp vscode-win32-x64
+      - name: Build VSCode Windows
+        run: npm run gulp vscode-win32-x64
 
+      # -------------------------
+      # EMPACOTAR BUILD
+      # -------------------------
       - name: Zip Windows Build
+        shell: pwsh
         run: |
           cd out
-          powershell Compress-Archive -Path vscode-win32-x64 -DestinationPath windows-build.zip
+          Compress-Archive -Path vscode-win32-x64 -DestinationPath vscode-windows-build.zip
 
-      - name: Upload Windows Artifacts
+      # -------------------------
+      # UPLOAD DO ARTEFATO
+      # -------------------------
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-artifacts
-          path: out/windows-build.zip
-
-
-  # ===================================
-  # FINAL RELEASE
-  # ===================================
-  release:
-    name: Release All Artifacts
-    runs-on: ubuntu-22.04
-    needs: [build-linux, build-windows]
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./release
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag_name: v${{ github.run_number }}
-          name: "NPSharp Build ${{ github.run_number }}"
-          files: |
-            release/**/linux-build.zip
-            release/**/windows-build.zip
+          name: vscode-windows-build
+          path: out/vscode-windows-build.zip
