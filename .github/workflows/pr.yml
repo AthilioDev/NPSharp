@@ -65,7 +65,10 @@ jobs:
         shell: pwsh
         run: |
           cd out
-          Compress-Archive -Path vscode-win32-x64 -DestinationPath vscode-windows-build.zip
+          $dir = Get-ChildItem -Directory | Select-Object -First 1
+          Write-Host "📦 Encontrado build: $($dir.Name)"
+          Compress-Archive -Path $dir.Name -DestinationPath vscode-windows-build.zip
+
 
       # -------------------------
       # UPLOAD DO ARTEFATO
