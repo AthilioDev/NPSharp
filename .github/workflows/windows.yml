@@ -52,43 +52,29 @@ jobs:
       - name: Compile
         run: npm run compile
 
-      - name: Build NPSharp Windows
-        run: npm run gulp vscode-win32-x64
+      - name: Build NPSharp Windows (Portable Real)
+        run: npm run gulp vscode-win32-x64-archive
 
       # -------------------------
       # ZIP
       # -------------------------
 
-      - name: Zip Real NPSharp Portable Build
+      - name: Zip NPSharp Portable
         shell: pwsh
         run: |
-          $root = $env:GITHUB_WORKSPACE
+          $build = Join-Path $env:GITHUB_WORKSPACE "out"
 
-          # Caminhos mais comuns do VSCode build
-          $paths = @(
-            "$root\VSCode-win32-x64",
-            "$root\.build\VSCode-win32-x64",
-            "$root\out\VSCode-win32-x64",
-            "$root\dist\VSCode-win32-x64"
-          )
+          $dir = Get-ChildItem $build -Directory |
+            Where-Object { $_.Name -like "*win32-x64*" } |
+            Select-Object -First 1
 
-          $found = $null
-
-          foreach ($p in $paths) {
-            if (Test-Path $p) {
-              $found = $p
-              break
-            }
-          }
-
-          if (!$found) {
-            Write-Error "Build portable real não encontrada"
+          if (!$dir) {
+            Write-Error "Build não encontrada na pasta out"
             exit 1
           }
 
-          Write-Host "Build real em: $found"
-
-          Compress-Archive -Path "$found\*" -DestinationPath "$root\vscode-windows-build.zip"
+          Compress-Archive -Path "$($dir.FullName)\*" `
+            -DestinationPath "$env:GITHUB_WORKSPACE\npsharp-windows-portable.zip"
 
       # -------------------------
       # UPLOAD DO ARTEFATO
@@ -96,6 +82,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-windows-build
-          path: vscode-windows-build.zip
+          name: npsharp-windows-portable
+          path: npsharp-windows-portable.zip
 
