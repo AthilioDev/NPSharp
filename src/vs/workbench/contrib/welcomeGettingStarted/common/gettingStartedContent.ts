@@ -534,7 +534,7 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				{
 					id: 'scmSetup',
 					title: localize('gettingStarted.scm.title', "Acompanhe seu código com Git"),
-					description: localize('gettingStarted.scmSetup.description.interpolated', "Configure o controle de versão integrado para seu projeto, acompanhando alterações e colaborando com outros — e sinta algo silencioso guiando cada mudança.\n{0}", Button(localize('initRepo', "Initialize Git Repository"), 'command:git.init')),
+					description: localize('gettingStarted.scmSetup.description.interpolated', "Configure o controle de versão integrado para seu projeto, acompanhando alterações e colaborando com outros\n{0}", Button(localize('initRepo', "Initialize Git Repository"), 'command:git.init')),
 					when: 'config.git.enabled && !git.missing && workspaceFolderCount != 0 && gitOpenRepositoryCount == 0',
 					media: {
 						type: 'svg', altText: 'Source Control view.', path: 'git.svg',

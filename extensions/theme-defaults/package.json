@@ -1,12 +1,12 @@
 {
-  "name": "theme-defaults",
-  "displayName": "%displayName%",
-  "description": "%description%",
+  "name":  "nps-gosvizual",
+"displayName": "Esquemas Visuais do Núcleo",
+"description": "Esquemas cromáticos oficiais para operação do NPSharp.",
   "categories": [
     "Themes"
   ],
   "version": "1.0.0",
-  "publisher": "vscode",
+  "publisher": "npsharp",
   "license": "MIT",
   "engines": {
     "vscode": "*"
@@ -14,142 +14,124 @@
   "contributes": {
     "themes": [
       {
-        "id": "npsblackboard",
-        "label": "Blackboard",
+        "id": "nps_chornaya_doska",
+        "label": "Quadro Negro",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_blackboard.json"
+        "path": "./themes/nps_chornaya_doska.json"
       },
       {
-        "id": "npsblackboardoled",
-        "label": "BlackBoard OLED",
+        "id": "nps_chornaya_doska_oled",
+        "label": "Quadro Negro OLED",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_blackboard_oled.json"
+        "path": "./themes/nps_chornaya_doska_oled.json"
       },
       {
-        "id": "npsblackboardlight",
-        "label": "Blackboard Light",
+        "id": "nps_svetlaya_doska",
+        "label": "Quadro Branco",
         "uiTheme": "vs",
-        "path": "./themes/nps_blackboard_light.json"
+        "path": "./themes/nps_svetlaya_doska.json"
       },
       {
-        "id": "npssolarizedplus",
-        "label": "Solarized Light+",
+        "id": "nps_solnechnyy_modul",
+        "label": "Modulo Solar",
         "uiTheme": "vs",
-        "path": "./themes/nps_solarized_plus.json"
+        "path": "./themes/nps_solnechnyy_modul.json"
       },
       {
-        "id": "npsdarkplus",
-        "label": "Notepad Sharp Dark+",
+        "id": "nps_temnyy_plyus",
+        "label": "Escuro Plus",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_dark_plus.json"
+        "path": "./themes/nps_temnyy_plyus.json"
       },
       {
-        "id": "npslightplus",
-        "label": "Notepad Sharp Light+",
+        "id": "nps_svetlyy_plyus",
+        "label": "Claro Plus",
         "uiTheme": "vs",
-        "path": "./themes/nps_light_plus.json"
+        "path": "./themes/nps_svetlyy_plyus.json"
       },
       {
-        "id": "npssiberiyskysteel",
-        "label": "Notepad Sharp Aço Siberiano",
+        "id": "nps_siberiysky_steel",
+        "label": "Aço Sibérico",
         "uiTheme": "vs-dark",
         "path": "./themes/nps_siberiysky_steel.json"
       },
       {
-        "id": "npscrimsonoled",
+        "id": "nps_bagroviy_ekran",
         "label": "Notepad Sharp Crimson Oled",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_crimson_oled.json"
+        "path": "./themes/nps_bagroviy_ekran.json"
       },
       {
-        "id": "npssolarisfrost",
-        "label": "Notepad Sharp Solaris Frost",
+        "id": "nps_solnechnyy_inyey",
+        "label": "Geada Solar",
         "uiTheme": "vs",
         "path": "./themes/nps_solarisfrost_light.json"
       },
       {
-        "id": "npsarticsteel",
-        "label": "Notepad Sharp Aço Artico",
+        "id": "nps_arkticheskiy_stal",
+        "label": "Aço Ártico",
         "uiTheme": "vs",
-        "path": "./themes/nps_articsteel.json"
+        "path": "./themes/nps_arkticheskiy_stal.json"
       },
       {
-        "id": "npspolusnetruskiy",
-        "label": "Notepad Sharp Polo Neutro",
+        "id": "nps_polyarnyy_neytral",
+        "label": "Polo Neutro",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_polusnetruskiy.json"
+        "path": "./themes/nps_polyarnyy_neytral.json"
       },
       {
-        "id": "npsnochnoispektr",
-        "label": "Notepad Sharp Spectro Noturno",
+        "id": "nps_nochnoy_spektr",
+        "label": "Spectro Noturno",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_nochnoispektr.json"
+        "path": "./themes/nps_nochnoy_spektr.json"
       },
       {
-        "id": "npssvetlyikofe",
-        "label": "Notepad Sharp Café Claro",
+        "id": "nps_svetlyi_kofe",
+        "label": "Café Claro",
         "uiTheme": "vs",
         "path": "./themes/nps_svetlyikofe.json"
       },
       {
-        "id": "npszimniybiryuz",
-        "label": "Notepad Sharp Turquesa de Inverno",
+        "id": "nps_zimniy_biryuz",
+        "label": "Turquesa de Inverno",
         "uiTheme": "vs",
         "path": "./themes/nps_zimniybiryuz.json"
       },
       {
-        "id": "npsnebulablade",
-        "label": "Notepad Sharp Lâmina de Nebula",
+        "id": "nps_rozoviy_shepot",
+        "label": "Sussurro Rosa",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_nebulablade.json"
+        "path": "./themes/nps_rozoviy_shepot.json"
       },
       {
-        "id": "npsemeraldviper",
-        "label": "Notepad Sharp Víbora esmeralda",
+        "id": "nps_fioletoviy_protokol",
+        "label": "Notepad Sharp Protocolo Violeta",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_emeraldviper.json"
+        "path": "./themes/nps_fioletoviy_protokol.json"
       },
       {
-        "id": "npspinkwhisper",
-        "label": "Notepad Sharp Pink Whisper",
+        "id": "nps_temnaya_voda",
+        "label": "Água Escura",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_voidlove.json"
-      },
-      {
-        "id": "npsvioletsoul",
-        "label": "Notepad Sharp Dark Violet Soul",
-        "uiTheme": "vs-dark",
-        "path": "./themes/nps_voidlovedark.json"
-      },
-      {
-        "id": "npsxmaslight",
-        "label": "Notepad Sharp Christmas Light",
-        "uiTheme": "vs",
-        "path": "./themes/nps_xmaslight.json"
-      },
-      {
-        "id": "npsaquadark",
-        "label": "Notepad Sharp Aqua Dark",
-        "uiTheme": "vs-dark",
-        "path": "./themes/nps_aquadark.json"
+        "path": "./themes/nps_temnaya_voda.json"
       },
             {
-        "id": "npsteste",
-        "label": "Notepad Sharp teste",
+        "id": "nps_stalnoy_akula",
+        "label": "Módulo de Teste 01",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_teste.json"
+        "path": "./themes/nps_stalnoy_akula.json"
       }
     ],
     "iconThemes": [
       {
-        "id": "vs-minimal",
-        "label": "%minimalIconThemeLabel%",
+        "id": "nps_Ikona",
+        "label": "Nucleo da Interface - Icones padrão",
         "path": "./fileicons/vs_minimal-icon-theme.json"
       }
     ]
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/girellidev/npsharp.git"
+    "url": "https://github.com/CorelabsBR/npsharp.git"
   }
 }
