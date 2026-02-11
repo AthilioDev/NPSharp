@@ -32,11 +32,13 @@ jobs:
           }
 
           if (!(Test-Path "gulpfile.mjs")) {
-            Write-Error "gulpfile.js não encontrado"
+            Write-Error "gulpfile.mjs não encontrado"
             exit 1
           }
 
+          Write-Host "Node version:"
           node -v
+          Write-Host "NPM version:"
           npm -v
 
       # -------------------------
@@ -45,36 +47,63 @@ jobs:
       - name: Install Windows Build Dependencies
         shell: pwsh
         run: |
+          choco install -y python3 visualstudio2022buildtools
+          python --version
 
+      # -------------------------
+      # DEPENDÊNCIAS NPM
+      # -------------------------
       - name: Install NPM Packages
-        run: npm i
+        shell: pwsh
+        run: |
+          if (Test-Path "package-lock.json") {
+            npm ci
+          } else {
+            npm install
+          }
 
+      # -------------------------
+      # BUILD
+      # -------------------------
       - name: Compile
+        shell: pwsh
         run: npm run compile
 
-      - name: Build NPSharp Windows (Portable Real)
+      - name: Build NPSharp Windows (Portable)
+        shell: pwsh
         run: npm run gulp vscode-win32-x64-archive
 
       # -------------------------
       # ZIP
       # -------------------------
-
       - name: Zip NPSharp Portable
         shell: pwsh
         run: |
           $build = Join-Path $env:GITHUB_WORKSPACE "out"
+
+          if (!(Test-Path $build)) {
+            Write-Error "Pasta 'out' não encontrada"
+            exit 1
+          }
 
           $dir = Get-ChildItem $build -Directory |
             Where-Object { $_.Name -like "*win32-x64*" } |
             Select-Object -First 1
 
           if (!$dir) {
-            Write-Error "Build não encontrada na pasta out"
+            Write-Error "Build win32-x64 não encontrada na pasta out"
             exit 1
           }
 
-          Compress-Archive -Path "$($dir.FullName)\*" `
-            -DestinationPath "$env:GITHUB_WORKSPACE\npsharp-windows-portable.zip"
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE "npsharp-windows-portable.zip"
+
+          if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+          }
+
+          Compress-Archive -Path "$($dir.FullName)\*" -DestinationPath $zipPath
+
+          Write-Host "ZIP gerado em: $zipPath"
 
       # -------------------------
       # UPLOAD DO ARTEFATO
@@ -84,4 +113,3 @@ jobs:
         with:
           name: npsharp-windows-portable
           path: npsharp-windows-portable.zip
-
