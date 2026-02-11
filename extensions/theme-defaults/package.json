@@ -1,7 +1,7 @@
 {
-  "name": "theme-defaults",
-  "displayName": "%displayName%",
-  "description": "%description%",
+  "name":  "nps-gosvizual",
+"displayName": "Esquemas Visuais do Núcleo",
+"description": "Esquemas cromáticos oficiais para operação do NPSharp.",
   "categories": [
     "Themes"
   ],
@@ -124,8 +124,8 @@
     ],
     "iconThemes": [
       {
-        "id": "vs-minimal",
-        "label": "%minimalIconThemeLabel%",
+        "id": "nps_Ikona",
+        "label": "Nucleo da Interface - Icones padrão",
         "path": "./fileicons/vs_minimal-icon-theme.json"
       }
     ]

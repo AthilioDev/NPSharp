@@ -510,7 +510,7 @@
 
 				// Show our splash as early as possible
 				showSplash(windowConfig);
-
+				// aqui um dia existiu algo, me pergunto se valeu a pena
 				// Code windows have a `vscodeWindowId` property to identify them
 				Object.defineProperty(window, 'vscodeWindowId', {
 					get: () => windowConfig.windowId
