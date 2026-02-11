@@ -1,0 +1,10 @@
+name: NPsharp • linux NPSharp Build
+
+on:
+  push:
+    branches:
+      -main
+      -arcaridev
+  workflow_dispatch:
+
+    jobs:
