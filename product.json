@@ -45,7 +45,7 @@
 	"quality": "oss",
 	"target": "npsharp",
 	"productConfiguration": {
-		"enableTelemetry": false
+		"enableTelemetry": false,
 		"telemetry.enableTelemetry": false,
 		"telemetry.enableCrashReporter": false,
 		"update.mode": "none"
