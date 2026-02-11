@@ -35,8 +35,12 @@ jobs:
         run: npm ci
 
       # Se tiver build no seu projeto, deixa esse passo:
-      - name: Build project
-        run: npm run build
+      - name: Compile project
+        run: npm run compile
+
+      - name: Build NPSharp Windows (Portable)
+        run: npm run gulp vscode-win32-x64-min
+
         # Se não tiver build, pode apagar esse step
 
       # Exemplo: rodar testes (opcional)

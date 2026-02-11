@@ -71,7 +71,7 @@ jobs:
 
       - name: Build NPSharp Windows (Portable)
         shell: pwsh
-        run: npm run gulp vscode-win32-x64-archive
+        run: npm run gulp vscode-win32-x64-min
 
       # -------------------------
       # ZIP
