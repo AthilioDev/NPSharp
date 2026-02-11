@@ -1,4 +1,4 @@
-{
+	{
 	"nameShort": "NPSharp",
 	"nameLong": "Notepad Sharp",
 	"applicationName": "NPSharp",
@@ -45,7 +45,10 @@
 	"quality": "oss",
 	"target": "npsharp",
 	"productConfiguration": {
-		"enableTelemetry": false
+		"enableTelemetry": false,
+		"telemetry.enableTelemetry": false,
+		"telemetry.enableCrashReporter": false,
+		"update.mode": "none"
 	},
 	"hiddenCommands": [
 		"workbench.action.chat.newChat",
