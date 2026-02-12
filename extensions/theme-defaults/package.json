@@ -116,10 +116,10 @@
         "path": "./themes/nps_temnaya_voda.json"
       },
             {
-        "id": "nps_stalnoy_akula",
-        "label": "Módulo de Teste 01",
+        "id": "nps_yediny_kod",
+        "label": "Código Unico",
         "uiTheme": "vs-dark",
-        "path": "./themes/nps_stalnoy_akula.json"
+        "path": "./themes/nps_yedinykod.json"
       }
     ],
     "iconThemes": [
