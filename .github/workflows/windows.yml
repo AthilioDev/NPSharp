@@ -65,9 +65,13 @@ jobs:
       # -------------------------
       # BUILD
       # -------------------------
+      - name: Compile
+        shell: pwsh
+        run: npm run compile
+
       - name: Compile VSCode
         shell: pwsh
-        run: npm run gulp compile-build
+        run: npm run gulp compile
 
       - name: Build NPSharp Windows (CI)
         shell: pwsh
