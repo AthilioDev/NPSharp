@@ -65,15 +65,13 @@ jobs:
       # -------------------------
       # BUILD
       # -------------------------
-      - name: Compile
+      - name: Compile VSCode
         shell: pwsh
-        run: npm run compile
+        run: npm run gulp compile-build
 
       - name: Build NPSharp Windows (CI)
         shell: pwsh
         run: npm run gulp vscode-win32-x64-ci
-
-
       # -------------------------
       # ZIP
       # -------------------------
