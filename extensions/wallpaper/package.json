@@ -336,7 +336,7 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"@vscode/sudo-prompt": "^9.3.1",
+		"@vscode/sudo-prompt": "^9.3.2",
 		"fast-glob": "^3.3.3",
 		"stylis": "^4.3.6",
 		"uglify-js": "^3.19.3"
