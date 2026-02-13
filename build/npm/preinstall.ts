@@ -128,21 +128,28 @@ function installHeaders() {
 	// Remove dependency on std::source_location to avoid bumping the required GCC version to 11+
 	// Refs https://chromium-review.googlesource.com/c/v8/v8/+/6879784
 	if (process.platform === 'linux') {
-		const homedir = os.homedir();
-		const cachePath = process.env.XDG_CACHE_HOME || path.join(homedir, '.cache');
-		const nodeGypCache = path.join(cachePath, 'node-gyp');
-		const localHeaderPath = path.join(nodeGypCache, local!.target, 'include', 'node');
-		if (fs.existsSync(localHeaderPath)) {
-			console.log('Applying v8-source-location.patch to', localHeaderPath);
-			try {
-				child_process.execFileSync('patch', ['-p0', '-i', path.join(import.meta.dirname, 'gyp', 'custom-headers', 'v8-source-location.patch')], {
-					cwd: localHeaderPath
-				});
-			} catch (error) {
-				throw new Error(`Error applying v8-source-location.patch: ${(error as Error).message}`);
+		const major = parseInt(process.versions.node.split('.')[0], 10);
+		if (major >= 22) {
+			console.log('NPSharp: skipping v8 patch for Node >=22');
+		} else {
+			const homedir = os.homedir();
+			const cachePath = process.env.XDG_CACHE_HOME || path.join(homedir, '.cache');
+			const nodeGypCache = path.join(cachePath, 'node-gyp');
+			const localHeaderPath = path.join(nodeGypCache, local!.target, 'include', 'node');
+
+			if (fs.existsSync(localHeaderPath)) {
+				console.log('Applying v8-source-location.patch to', localHeaderPath);
+				try {
+					child_process.execFileSync('patch', ['-p0', '-i', path.join(import.meta.dirname, 'gyp', 'custom-headers', 'v8-source-location.patch')], {
+						cwd: localHeaderPath
+					});
+				} catch (error) {
+					throw new Error(`Error applying v8-source-location.patch: ${(error as Error).message}`);
+				}
 			}
 		}
 	}
+
 }
 
 function getHeaderInfo(rcFile: string): { disturl: string; target: string } | undefined {
