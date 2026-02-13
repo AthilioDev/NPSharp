@@ -1,3 +1,4 @@
+
 name: NPSHARP • Windows NPSharp Build
 
 on:
@@ -18,7 +19,8 @@ jobs:
       - name: Setup Node.js (EXACT VERSION)
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: 22
+
 
       # -------------------------
       # VALIDAR PROJETO
@@ -30,17 +32,14 @@ jobs:
             Write-Error "package.json não encontrado"
             exit 1
           }
-
           if (!(Test-Path "gulpfile.mjs")) {
             Write-Error "gulpfile.mjs não encontrado"
             exit 1
           }
-
           Write-Host "Node version:"
           node -v
           Write-Host "NPM version:"
           npm -v
-
       # -------------------------
       # DEPENDÊNCIAS DO WINDOWS
       # -------------------------
@@ -49,7 +48,6 @@ jobs:
         run: |
           choco install -y python3 visualstudio2022buildtools
           python --version
-
       # -------------------------
       # DEPENDÊNCIAS NPM
       # -------------------------
@@ -61,7 +59,6 @@ jobs:
           } else {
             npm install
           }
-
       # -------------------------
       # BUILD
       # -------------------------
@@ -83,23 +80,17 @@ jobs:
         shell: pwsh
         run: |
           $build = Join-Path $env:GITHUB_WORKSPACE "out"
-
           Write-Host "Conteúdo de out:"
           Get-ChildItem $build
-
           $dir = Get-ChildItem $build -Directory |
             Where-Object { $_.Name -like "*win32-x64*" } |
             Select-Object -First 1
-
           if (!$dir) {
             Write-Error "Build win32-x64 não encontrada na pasta out"
             exit 1
           }
-
           Compress-Archive -Path "$($dir.FullName)\*" `
             -DestinationPath "$env:GITHUB_WORKSPACE\npsharp-windows-portable.zip"
-
-
       # -------------------------
       # UPLOAD DO ARTEFATO
       # -------------------------
