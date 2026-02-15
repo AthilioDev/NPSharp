@@ -127,3 +127,7 @@ Copyright (c) NPSharp Project
 Licenciado sob **MIT License**
 
 Fork. Modifique. Distribua. Domine.
+
+---
+
+Forkei porque participei diretamente do desenvolvimento e ele foi um dos maiores projetos que já construí. Aqui mantenho minha própria evolução, decisões técnicas e melhorias que fazem parte da minha visão para o futuro dele.
